@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAURIS — Suivi Materiel</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0F1117;--bg2:#1A1D27;--bg3:#22263A;--bg4:#2A2F47;--or:#F05A28;--or2:#E04818;--or3:#FF7A50;--ve:#10B981;--ro:#EF4444;--ja:#F59E0B;--bl:#3B82F6;--tx:#F8FAFC;--tx2:#94A3B8;--tx3:#475569;--bd:#2A2F47;--bd2:#3A4060;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:100;}
+.hi{max-width:1400px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo img{height:34px;background:white;border-radius:6px;padding:3px 7px;}
+.lt .t{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1.5px;color:var(--tx);}
+.lt .s{font-size:10px;color:var(--tx3);}
+.sync{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx2);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--tx3);}
+.dot.on{background:var(--ve);box-shadow:0 0 6px var(--ve);} .dot.sv{background:var(--ja);}
+.btn{border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;padding:8px 14px;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-or{background:var(--or);color:white;} .btn-or:hover{background:var(--or2);}
+.btn-gh{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);} .btn-gh:hover{background:var(--bg4);color:var(--tx);}
+.btn-sm{padding:6px 10px;font-size:12px;}
+.btn-ro{background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.3);}
+.sb{background:var(--bg2);border-bottom:1px solid var(--bd);overflow-x:auto;}
+.si{max-width:1400px;margin:0 auto;padding:0 20px;display:flex;}
+.si-item{padding:12px 24px 12px 0;border-right:1px solid var(--bd);margin-right:24px;white-space:nowrap;}
+.si-item:last-child{border-right:none;}
+.sv2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;}
+.sl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;}
+.tabs{background:var(--bg2);border-bottom:1px solid var(--bd);overflow-x:auto;}
+.ti{max-width:1400px;margin:0 auto;padding:0 20px;display:flex;}
+.tab{padding:12px 18px;border:none;background:none;font-size:13px;font-weight:500;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.tab i{font-size:15px;} .tab.active{color:var(--or);border-bottom-color:var(--or);font-weight:600;} .tab:hover{color:var(--tx2);}
+.main{max-width:1400px;margin:0 auto;padding:20px;}
+.page{display:none;} .page.active{display:block;}
+.toolbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
+.tl .title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;}
+.tl .desc{font-size:13px;color:var(--tx3);margin-top:2px;}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.sw{display:flex;align-items:center;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:0 10px;gap:6px;}
+.sw i{color:var(--tx3);font-size:14px;}
+.sw input{background:none;border:none;outline:none;color:var(--tx);font-size:13px;padding:8px 0;width:160px;font-family:'Inter',sans-serif;}
+.sw input::placeholder{color:var(--tx3);}
+.fsl{background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--tx);cursor:pointer;outline:none;font-family:'Inter',sans-serif;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.card:hover{border-color:var(--bd2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.card-top{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bd);}
+.cat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--bg3);}
+.eid{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--or);letter-spacing:1.5px;}
+.enom{font-size:13px;font-weight:600;color:var(--tx);line-height:1.3;}
+.ecat{font-size:11px;color:var(--tx3);margin-top:1px;}
+.bdg{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.bdg.disponible{background:rgba(16,185,129,.15);color:#34D399;}
+.bdg.en-chantier{background:rgba(245,158,11,.15);color:#FCD34D;}
+.bdg.en-panne{background:rgba(239,68,68,.15);color:#F87171;}
+.bdg.entretien{background:rgba(148,163,184,.15);color:var(--tx2);}
+.bdg.vendu{background:rgba(59,130,246,.15);color:#60A5FA;}
+.bdg.hors-parc{background:rgba(100,100,100,.2);color:#9CA3AF;}
+.bdg.depot{background:rgba(139,92,246,.15);color:#A78BFA;}
+.card-body{padding:12px 16px;}
+.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.cs{background:var(--bg3);border-radius:8px;padding:8px 10px;}
+.cs .l{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.cs .v{font-size:13px;font-weight:600;color:var(--tx);}
+.cs .v.hl{color:var(--or);}
+.card-actions{display:flex;gap:6px;}
+.ba{flex:1;padding:7px;border-radius:8px;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .15s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;}
+.ba:hover{background:rgba(240,90,40,.15);border-color:var(--or);color:var(--or);}
+.ba i{font-size:14px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;}
+.mhead{background:var(--bg3);padding:16px 20px;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.mtitle{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;}
+.mclose{background:var(--bg4);border:1px solid var(--bd2);color:var(--tx2);width:30px;height:30px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.mclose:hover{color:var(--tx);}
+.mbody{padding:20px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fm{display:flex;flex-direction:column;gap:5px;}
+.fm.full{grid-column:1/-1;}
+.fl{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;}
+.fi{background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 11px;font-size:14px;color:var(--tx);outline:none;width:100%;font-family:'Inter',sans-serif;}
+.fi:focus{border-color:var(--or);}
+.fsl2{background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:9px 11px;font-size:14px;color:var(--tx);outline:none;width:100%;font-family:'Inter',sans-serif;cursor:pointer;}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--bd);}
+.tw{overflow-x:auto;border-radius:12px;border:1px solid var(--bd);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--bg3);}
+thead th{padding:10px 13px;text-align:left;font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--bd);transition:background .15s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;} tbody tr:hover{background:var(--bg3);}
+tbody td{padding:10px 13px;font-size:13px;}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.rc{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:18px;}
+.rc.full{grid-column:1/-1;}
+.rc h3{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+.pi{margin-bottom:10px;}
+.pl{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:4px;}
+.pl span:last-child{font-weight:600;color:var(--tx);}
+.pb{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.pf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--or),var(--or3));}
+.cc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+.cc{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;overflow:hidden;}
+.cc-h{background:var(--bg3);padding:13px 17px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.cc-n{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;gap:7px;}
+.cc-c{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--or);}
+.cc-b{padding:13px 17px;}
+.er{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd);}
+.er:last-child{border-bottom:none;}
+.er .rid{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:var(--or);letter-spacing:1px;width:100px;}
+.er .rn{font-size:12px;color:var(--tx2);flex:1;}
+.er .rc2{font-size:13px;font-weight:600;}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);padding:11px 17px;border-radius:10px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;}
+.empty{text-align:center;padding:40px;color:var(--tx3);}
+.empty i{font-size:44px;display:block;margin-bottom:10px;opacity:.3;}
+.dg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.di{background:var(--bg3);border-radius:9px;padding:11px;}
+.subtabs{display:flex;gap:6px;border-bottom:1px solid var(--bd);margin-bottom:14px;flex-wrap:wrap;}
+.subtab{padding:9px 14px;border:none;background:none;color:var(--tx3);font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;}
+.subtab i{font-size:14px;}
+.subtab.active{color:var(--or);border-bottom-color:var(--or);}
+.subtab:hover{color:var(--tx2);}
+.subpage{display:none;}
+.subpage.active{display:block;}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:14px;}
+.photo-thumb{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--bd2);aspect-ratio:1;background:var(--bg3);}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;}
+.photo-thumb .pdel{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.photo-add-btn{border:2px dashed var(--bd2);border-radius:10px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--tx3);gap:4px;font-size:11px;background:var(--bg3);}
+.photo-add-btn:hover{border-color:var(--or);color:var(--or);}
+.photo-add-btn i{font-size:22px;}
+.cr-item{background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:13px;margin-bottom:10px;}
+.cr-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.cr-meca{font-size:13px;font-weight:700;color:var(--or);}
+.cr-date{font-size:11px;color:var(--tx3);}
+.cr-text{font-size:13px;color:var(--tx2);line-height:1.5;white-space:pre-wrap;}
+.pin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;align-items:center;justify-content:center;}
+.pin-overlay.open{display:flex;}
+.pin-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:28px;width:100%;max-width:340px;text-align:center;}
+.pin-box i{font-size:32px;color:var(--or);margin-bottom:10px;display:block;}
+.pin-box h3{font-family:'Barlow Condensed',sans-serif;font-size:17px;margin-bottom:6px;}
+.pin-box p{font-size:12px;color:var(--tx3);margin-bottom:16px;}
+.pin-input{width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:8px;padding:12px;text-align:center;font-size:20px;letter-spacing:6px;color:var(--tx);outline:none;font-family:'Inter',sans-serif;margin-bottom:12px;}
+.pin-input:focus{border-color:var(--or);}
+.pin-err{color:var(--ro);font-size:12px;margin-bottom:10px;min-height:16px;}
+.di .l{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+.di .v{font-size:14px;font-weight:600;}
+@media(max-width:700px){.fg{grid-template-columns:1fr;}.dg{grid-template-columns:1fr 1fr;}.rg{grid-template-columns:1fr;}.grid{grid-template-columns:1fr;}.cc-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="pin-overlay open" id="ov-app-login" style="z-index:500;">
+  <div class="pin-box">
+    <i class="ti ti-lock"></i>
+    <h3>SUIVI MATERIEL CAURIS</h3>
+    <p>Mot de passe requis pour acceder a l application.</p>
+    <input type="password" class="pin-input" id="app-pwd-input" placeholder="Mot de passe">
+    <div class="pin-err" id="app-pwd-err"></div>
+    <button class="btn btn-or" id="app-pwd-confirm" style="width:100%;">Entrer</button>
+  </div>
+</div>
+<div class="hdr">
+  <div class="hi">
+    <div class="logo">
+      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABBAJgDASIAAhEBAxEB/8QAHAAAAgMBAQEBAAAAAAAAAAAAAAgFBgcEAwEC/8QAQxAAAQMDAgQDBQQFCQkAAAAAAQIDBAAFEQYSByExQQgTURQiMmFxUmKRsSMzOHSBFRYkNkJDobPRN1NzgoOisrTB/8QAHAEAAQUBAQEAAAAAAAAAAAAAAAECAwQFBgcI/8QANBEAAQMCBAMGBAUFAAAAAAAAAQACAwQRBRIhMSJBcQYTUWGB0SNSscEUMjNCkTRyoeHx/9oADAMBAAIRAxEAPwBy6KK85chiJGdkyXUNMtJK3FqOAkDqTQhcOp73B09ZX7rPXhpockj4lqPRI+ZrEJvGu+W4yL1OahotbJwIwR7zijna2lWclR9egAJxUXxK1c5q28rc84RbPCClNlw4ShA+J1fzPp9AOZrANbaiVfrglLCVs26NlMVlR58+rivvqwM+gwO1dLh+FNcPiC55+X+1lVVYQeErU7V4mdbNahTKuUK2SLWpz9JDaaKFJRn+yvOdwHryPoKa/TF8tmpLDEvdnkpkwpTYW2sf4gjsQeRHYikX4NcOLlxG1J7EwpUa2RsLnzMcm0fZT6rPPA7dT0prLBqew6YmQ9NWWE3H0/DR5AcTzJVnm5nuM9T1OSay+1FZhmGGNriGuJt/33/nkrmEQVdXmIFwNVp1FfEqSpIUkhSSMgg5BFfSQBknAFZysoopNNZ674k8T+IU606MkXVESO44IsOA95GGkHHmOKBHM/M45gCrl4aOJOqka6e4eaykSpLqg4hgyyS+w82CVNqPUgpCuvTb151ry4PLHEX5hcC5HMBUmVzHPy2NjpdMzRSxeLHX+qtP69t9o09fJ1rZRbkvOiO5tDiluKAJ+gR/jWj8MNTXG8eHE3x65yJF1ZtszzJSz+k81HmYOfUYFV34fIyBkxOjipG1LXSOj8Fq1FYB4PdV6l1QzqY6ivcy6GMYvk+0L3eXuDu7H1wPwqM4day1VO8Udz09Mv8AOftDcialENbmW0hIO0AfKnPw17XyMuOAXKRtU0ta635jZMlRSMQNb8Yr7fptv0/qHUlweZW4vyYqitSWwvGcAdBkD+Naj4cuL+p5usxofWr7kl1/eiO/IQG32XkAktr5DOcHrzBGO/KefBZYmF4cDbUjnZRx17HuDbEXTLUUqnDziTqdjjXqRF71BcJlltjV0kGItzKAhkqKQBjsBgVSP5x8Y+JFwud7s8y+PNQv0rrVvkFlqMk5KUBIUNxwOnNRxStwWTMQ54AABv1SGvbbQEn2TxUViHhR4kXXWVouFl1BKMu423Y41IV8bzKsj3sdSkjr33D0orNqad9PKY37hW4pWysD2rb6wzjLrVy8zjpmyrK4jbm19SP79wH4R90H8T9Kt3HDVUix2Vm2QFluXcAoKcScKbbGMkfM5xn60sOvb2uz2ZuHDUUTbglYU4DhTTA904+azkZ7BKh3rTwuiLyJD6e6qVc+UZR6qF4i6jRIKrBbHguG0sGU8jpIdHYHu2nt6nJ9MV7SOn7lqnUkGwWlrzJcx0IR6IHVS1fIDJP0qKppvBZpFpm03LWspoF+S4YcMqHwtpwVqH1VgZ+79a6WrmbQ0xcN+XmVlQxmolAKudyt9t4b6DhaLsA2uvI3Sn8YW7nktavmo8vkBjtVIqxcSXnXtZzvNyPLKUIH3QkYqu18tdpcRlr8RkfIdiQPQ/c6r2DCaVlNSsa0bi60fhbqraUWG4OcjyiuKP8A2H/5+HpWgXjlaZhH+4X/AOJpeASkhSSQQcgjtWwaQvzt80bN9qO6VGaW24r7Y2HCvr/pXWdj8cM1qKY6j8p8hy9OXl0WLjmHCO9RHsd/dYF4H+ertSqPM+wtc/8AqGru3wx1UnxOK12iLFbsXtBc8zz071ZjbCdg5/ETVI8D39bdS/uLP+Yqmur1fFKl8FZJl/cLehAXGUcTZIG35G6TPjdHTqvxA6mYaUt5u32x5e37JYiFRA/5+daB4bp5k+HHVkJSk5h+2pSB12rjheT/ABKvwqt8IGDqnxEa6nLCXF+zXDywPhVucDKfxSa8PC9LUxoviXZXUnzU2tTp58gUtuoI/GtCpF6buvkDFWiNpc/zZlPeBb9Rq36w/wAnqieFn7Yd3/eZ/wCRqW8C36jVv1h/k9UTws/bDu/7zP8AyNRzf1FV/b9gnR/pQ9fuubwg/wC2e+/uEn/2G6/Gq0to8aMYNgJBvEQqA9Sy2TWZaWv+q9N6pu1y0i5IalhL4fWzHDxQz5mVKIIICQQMntWm+FjTU/WXEuTrq8zEyhbHS86p1QU49JcSdpI7Aczn1AA6GrdTF3L5Klx0y287qGJ+drIgNb3Vc0pFfncXtfQoyN779vvjbaftKIWAKvngmvtubdv+mZDqW5kzZJjpVgealKSlYHqRkHHpn51DcBf2qLt/x7l/mGuTj/w6u3DjWCdaaWL0e0vSQ8y8wfegvk52H0QT07c9p7ZZOWTONK42LmtIPmE6PNGBMBexN0x3DjhZpXQNxmXCxImmVMR5by5D+/Kd27AAAA5/KiufgRxEZ4iaNTOdS21dYagzcGUdAvHJaR9lQ5j5gjtRXLVXeiUiY8QWxDkyAs2UP4hrDJlQoV9jNqcRECmpAH9lBIIV9M5B+opaeKFsfl2yHeGAXEwkGNISP7tCllSF49Ny1gnsdvrT1vtNPsrZebS404kpWhQyFA9QRS58T9HuaRvJejtB+0TNyWwsbk4I95lfqMfiPmK1sKrctozuNvNUqyC93Dmlbp5vC2ppXA2wBo/D7QFjPRXnuZpPNdac/kOch+Juctkokx1nmWz3aUftD17jB9caX4YuLEXRcx7TeoXfKsk13zGpB5iK8RglX3FYGT2Iz61sYtC6qpbx62N1RoniGbj6JkOIWjV3p0XG3KQmaE7VoUcB0Dpz7HtWX3G13G3OFE6E+wQcZWg4P0PQ0wMZ9mTHbkRnm3mXEhSHG1BSVA9CCORFehAIwQCPQ14/i3ZOmrpTMxxY478wfTTX1XcUWNS07AxwzAJbcj1rU+HdrkQdGXKXISUGY2paEkc9gQQD/HnVxes9pe/W2yGvnnmyn/Su1SEqbLakgoIwRjlj0qHA+yxw2q/ESPzW2sLb7/4T8Rxj8XD3TW2vulS8D39bdS/uLP8AmKq1XLihqu3+JCdpZVwbcsDG9ZjlhG4JRDLpAVjPxD1rJ721rngZxIuUq1NKajPqcRHkOsb40lhStyQccgocuWQQQe3X10Tp7V99a1ZxPusWcVpt8pUd0MKCpUp9BbAbQBkpAWegwOVevzU0csj6lxBa5oA6mwXERyuY1sQvcHXoqvw0c4jolz7nw+YuynV4RKdhMhwgE7glRIOPWrLwFky7ZqvWVquQcYlSdPXBp5lwYV56BuII7EYXWxeDGxz7Vou9Sp8SREVKuAShp9lTasIbTzwoA4O7/CqS1Zbhb/FzLWixzV2ydOdacdMZZaKH2DvVuxjGVK706SrbLJNDYaC9+ZskZAWNjffc/VSvgW/Uat+sP8nqiOFnPxh3fHP+kz/yNUpMviHwK1XdIMIKjIkfog89H8xiUhJOxxJ6bgCe/LJBFaJ4TdF6gl60m8Qr8xJZaU26GHH0FCpTrpytYBHwgZ59MkY6VHVMDBPUlwyvbYfwnQuLu7itq06qB8KMVqdxY1LCfSlbMi1y2nEqGQUqeQCCO/I13eEWY9p7ivf9ISlqBeZcb2q93c7HWRnB77So4+tevhNtN1hcYb2/NtU+KyqDICXH4y20kl9sgAqAB5V+NUWq76S8WbN7g2q4OwJNwafW8xGW4kIfTsdyrGBzUsnnyBoqHNllmhvu0EdQiIFjGP8AA/VQXCu7MWHxCapvkltxxi3t3eU4hvG5SUFSiBnvypitBarsnGTQt28yzvMW9x1cF5mSUqK/cSrcMdPiGO4IrAOHWk7pdOOuq7dLt0+LEuLN3iiS5GWlsBwqSCFEY75HrVVtGpeJPBuZddPNNfye5KXhwSI29KlAEBxpXQ8j1GR0yKSqpGVbvhn4gDba8kQzGEcQ4SSrr4PnnbZxcvtjQ4pbCojqFE9y08AlWPXmfxoqy+D7Q16gz7nrW+Q34wlM+REEhJS47uVuccweeMgDJ686KyMZe19UcpvoL9VeoWlsIumRrg1BaIV8tEi13Bvew8nBx1SeygexB5130VlglpuFbIvoUqWuNLOWWdM03fWluwnwClxIwVpz7jqPRSf9QeRrC9SWaXYrquBLwrkFtOp+F5s/CtPyPp2OQeYp/OIek4urLGqKva3MayqK+R8CvQ/dPf8AHtS6ag4Z6jvzSrBIsctua0pSocktHy2l9wV9PLVjnz5HB9Qeqw3EmlvGbePuseqpTfhHT2WV6B4laz0OoJsN4cRFzlUN8eawr190/D9U4NMzwH4zXviHeV2iXpVDXkNFyTPjvnym/sgoUM5Uc4APr6Uttq4T8Q7hqBFlGlbnGeLmxbz7CkMNjPNRc+Ej6E57Zp1OF2iLXoHSUexW0b1j35UgjCpDpHvLP5AdgAKTGpKQMuAC88x9TZLQNnzbkNCtNBzg469qKK5VbCo7ur5jqCgRrcwporafXLcKW0vtglxAP024+RJ54rxGuphkhCIDCEZIDat+7qruBtBATkg4zg4q8uxo7qChxhpaSreQpAI3ev1+dfTHjndlho7jk+4OZqwJY/lUWR3iqhbtXTZNovNwXHip9gjKdbbCjlRCN3M56fwFdtlvV1mXKI08mB7O/EXIUW929O0hO3qR1UKn0w4iSspisAuJ2rIbHvD0PqK/bMeOyAGWGmwAQAhAGM9elNdIw3s1KGu5lUW2a0nXERkrhQwHX0oKyFbQCjcU4URkjI5jIOeWa6bfrCU/KixnG4TK1PLTIGchpI2EYVuwrksncM9OlW5cOIsJC4rCgnBTlsHGOmK+ewQdoT7FG2hRUB5ScAnqenWnGWM/tSBj/FVGHrpL8N99bUdpSBIU2layN4SEqaHPupKjkeqTjpXYzqeS5DvbnlRAu2L8tJKztcO4jf8AJHb6pWO1WVyNHcKS4w0spIKdyAcEdMfSgx45QUFhopUnaRsGCPT6czSGSPk1KGu8VUP55vsNOvyosdUeK55ch1hSlJVlS0pUjlzBUEDn0JPpXPO1dcWGHlyYcFDjMhLBSUrXsO0lRwnKj0x0q7iPHDflhhoIwBt2DGAcgY+tfBFih1TwjM+Yo5UvYMk/M0okj+VGV3ioHSuoJV1uD8aXGZiqSyl1tpKt6tpA5lQO3qcY5EUVPsxo7K1LZYabUvG4oQATjpnFFRPIJuBZPaCBqvWiiimJUUUUUIRRRRQhFFFFCEUUUUIRRRRQhFFFFCEUUUUIRRRRQhFFFFCF/9k=" alt="CAURIS">
+      <div class="lt"><div class="t">SUIVI MATERIEL CHANTIER</div><div class="s">GESTION DES ENGINS — CAURIS VRD</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="sync"><span class="dot" id="dot"></span><span id="stxt">Chargement...</span></div>
+      <button class="btn btn-gh btn-sm" id="btn-refresh"><i class="ti ti-refresh"></i></button>
+      <button class="btn btn-or" id="btn-affect"><i class="ti ti-plus"></i> Affecter un engin</button>
+    </div>
+  </div>
+</div>
+<div class="sb"><div class="si">
+  <div class="si-item"><span class="sv2" style="color:var(--or)" id="s-total">57</span><span class="sl">Engins total</span></div>
+  <div class="si-item"><span class="sv2" style="color:var(--ve)" id="s-dispo">0</span><span class="sl">Disponibles</span></div>
+  <div class="si-item"><span class="sv2" style="color:var(--ja)" id="s-ch">0</span><span class="sl">En chantier</span></div>
+  <div class="si-item"><span class="sv2" style="color:var(--ro)" id="s-panne">0</span><span class="sl">En panne</span></div>
+  <div class="si-item" style="cursor:pointer;" id="si-depot" title="Voir les engins au depot"><span class="sv2" style="color:#A78BFA" id="s-depot">0</span><span class="sl">Au depot</span></div>
+  <div class="si-item"><span class="sv2" style="color:var(--or)" id="s-cout">0 €</span><span class="sl">Cout/jour</span></div>
+</div></div>
+<div class="tabs"><div class="ti">
+  <button class="tab active" id="tab-engins" data-tab="engins"><i class="ti ti-crane"></i> Engins</button>
+  <button class="tab" id="tab-chantiers" data-tab="chantiers"><i class="ti ti-building-factory"></i> Par chantier</button>
+  <button class="tab" id="tab-location" data-tab="location"><i class="ti ti-key"></i> Location</button>
+  <button class="tab" id="tab-journal" data-tab="journal"><i class="ti ti-clipboard-list"></i> Journal</button>
+  <button class="tab" id="tab-rapport" data-tab="rapport"><i class="ti ti-chart-bar"></i> Rapport</button>
+  <button class="tab" id="tab-periode" data-tab="periode"><i class="ti ti-calendar-search"></i> Suivi periode</button>
+  <button class="tab" id="tab-ajout" data-tab="ajout"><i class="ti ti-square-plus"></i> Ajouter un engin</button>
+</div></div>
+<div class="main">
+  <div class="page active" id="pg-engins">
+    <div class="toolbar">
+      <div class="tl"><div class="title">Parc materiel — 57 engins</div><div class="desc">Cliquez sur un engin pour le detail</div></div>
+      <div class="filters">
+        <div class="sw"><i class="ti ti-search"></i><input type="text" placeholder="ID ou nom..." id="srch"></div>
+        <select class="fsl" id="fcat"><option value="">Toutes categories</option></select>
+        <select class="fsl" id="fstat"><option value="">Tous statuts</option><option value="disponible">Disponible</option><option value="en-chantier">En chantier</option><option value="en-panne">En panne</option><option value="entretien">Entretien</option><option value="vendu">Vendu</option><option value="hors-parc">Hors parc</option><option value="depot">Au depot</option></select>
+        <select class="fsl" id="fch"><option value="">Tous chantiers</option></select>
+      </div>
+    </div>
+    <div class="grid" id="eg"></div>
+  </div>
+  <div class="page" id="pg-chantiers">
+    <div class="toolbar">
+      <div class="tl"><div class="title">Vue par chantier</div><div class="desc">Engins et couts par chantier</div></div>
+    </div>
+    <div class="cc-grid" id="cc"></div>
+
+    <!-- Zone suppression chantier -->
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--bd);">
+      <div style="font-size:12px;font-weight:700;color:var(--ro);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-trash"></i> Supprimer un chantier
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:500px;">
+        <select class="fsl" id="del-ch-select" style="flex:1;min-width:200px;">
+          <option value="">Choisir un chantier...</option>
+        </select>
+        <button class="btn btn-sm" style="background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.3);" id="btn-del-ch">
+          <i class="ti ti-trash"></i> Supprimer
+        </button>
+      </div>
+      <p style="font-size:11px;color:var(--tx3);margin-top:8px;">
+        <i class="ti ti-info-circle"></i> La suppression retire le chantier de la liste. Les affectations existantes ne sont pas modifiees.
+      </p>
+    </div>
+  </div>
+  <div class="page" id="pg-depot">
+    <div class="toolbar">
+      <div class="tl"><div class="title">Engins au depot</div><div class="desc">Engins actuellement au depot</div></div>
+    </div>
+    <!-- Stats depot -->
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px 22px;min-width:140px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:#A78BFA;" id="dep-count">0</div>
+        <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;">Engins au depot</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px 22px;min-width:140px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--or);" id="dep-cat-count">0</div>
+        <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;">Categories</div>
+      </div>
+    </div>
+    <!-- Filtres -->
+    <div class="filters" style="margin-bottom:16px;">
+      <div class="sw"><i class="ti ti-search"></i><input type="text" placeholder="ID ou nom..." id="dep-srch"></div>
+      <select class="fsl" id="dep-cat"><option value="">Toutes categories</option></select>
+    </div>
+    <!-- Grille depot -->
+    <div class="grid" id="dep-grid"></div>
+  </div>
+  <!-- PAGE LOCATION -->
+  <div class="page" id="pg-location">
+    <div class="toolbar">
+      <div class="tl"><div class="title">Location d engins</div><div class="desc">Engins actuellement en location</div></div>
+      <button class="btn btn-or" id="btn-add-loc"><i class="ti ti-plus"></i> Nouvelle location</button>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px 22px;min-width:140px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:#60A5FA;" id="loc-count">0</div>
+        <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;">Engins en location</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:16px 22px;min-width:140px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--or);" id="loc-cout">0 €</div>
+        <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;">Cout total/jour</div>
+      </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="filters" style="margin-bottom:16px;">
+      <div class="sw"><i class="ti ti-search"></i><input type="text" placeholder="ID, nom ou chantier..." id="loc-srch"></div>
+    </div>
+
+    <!-- Liste des locations -->
+    <div id="loc-grid" class="grid"></div>
+  </div>
+
+  <!-- MODAL NOUVELLE LOCATION -->
+  <div class="overlay" id="ov-loc">
+    <div class="modal" style="max-width:560px">
+      <div class="mhead"><span class="mtitle">NOUVELLE LOCATION</span><button class="mclose" id="mc-loc"><i class="ti ti-x"></i></button></div>
+      <div class="mbody">
+        <div class="fg">
+          <div class="fm"><label class="fl">Engin *</label><select class="fsl2" id="loc-engin"><option value="">Selectionner...</option></select></div>
+          <div class="fm"><label class="fl">Chantier *</label><select class="fsl2" id="loc-ch"><option value="">Selectionner...</option></select></div>
+          <div class="fm"><label class="fl">Date debut *</label><input type="date" class="fi" id="loc-debut"></div>
+          <div class="fm"><label class="fl">Date fin prevue</label><input type="date" class="fi" id="loc-fin"></div>
+          <div class="fm"><label class="fl">Loueur / Societe *</label><input type="text" class="fi" id="loc-loueur" placeholder="Nom du loueur"></div>
+          <div class="fm"><label class="fl">Cout/jour (€ HT) *</label><input type="number" class="fi" id="loc-cout-j" placeholder="Saisir le cout"></div>
+          <div class="fm full"><label class="fl">Notes</label><input type="text" class="fi" id="loc-notes" placeholder="Observations..."></div>
+        </div>
+        <div class="mfoot">
+          <button class="btn btn-gh" id="loc-cancel">Annuler</button>
+          <button class="btn btn-or" id="loc-save"><i class="ti ti-device-floppy"></i> Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="pg-journal">
+    <div class="toolbar">
+      <div class="tl"><div class="title">Journal des affectations</div><div class="desc">Historique complet</div></div>
+      <button class="btn btn-or" id="btn-affect2"><i class="ti ti-plus"></i> Nouvelle affectation</button>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>Date</th><th>Engin</th><th>Chantier</th><th>Statut</th><th>Cout/j</th><th>Operateur</th><th>Notes</th><th></th></tr></thead>
+      <tbody id="jtb"></tbody>
+    </table></div>
+  </div>
+  <div class="page" id="pg-rapport">
+    <div class="tl" style="margin-bottom:18px;"><div class="title">Rapport materiel</div><div class="desc">Couts et performances</div></div>
+    <div class="rg">
+      <div class="rc"><h3><i class="ti ti-building-factory"></i> Couts par chantier</h3><div id="rp1"></div></div>
+      <div class="rc"><h3><i class="ti ti-category"></i> Engins par categorie</h3><div id="rp2"></div></div>
+      <div class="rc full"><h3><i class="ti ti-trophy"></i> Top engins — cout cumule</h3><div id="rp3"></div></div>
+    </div>
+
+    <!-- EXPORT EXCEL -->
+    <div style="margin-top:24px;">
+      <div style="font-size:12px;font-weight:700;color:var(--or);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><i class="ti ti-file-export"></i> Export Excel</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
+
+        <!-- Export un engin -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;">Exporter un engin</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="fsl" id="export-eng-select" style="min-width:260px;">
+              <option value="">Choisir un engin...</option>
+            </select>
+            <button class="btn btn-or btn-sm" id="btn-export-one"><i class="ti ti-file-spreadsheet"></i> Exporter</button>
+          </div>
+        </div>
+
+        <!-- Export par chantier -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;">Exporter par chantier</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="fsl" id="export-ch-select" style="min-width:220px;">
+              <option value="">Choisir un chantier...</option>
+            </select>
+            <button class="btn btn-or btn-sm" id="btn-export-ch"><i class="ti ti-file-spreadsheet"></i> Exporter</button>
+          </div>
+        </div>
+
+        <!-- Export tout le parc -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;">Exporter tout le parc</label>
+          <button class="btn btn-gh btn-sm" id="btn-export-all"><i class="ti ti-file-spreadsheet"></i> Tous les engins</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- PAGE SUIVI PÉRIODE -->
+  <div class="page" id="pg-periode">
+    <div class="toolbar">
+      <div class="tl"><div class="title">Suivi par periode</div><div class="desc">Filtrer les engins par chantier et plage de dates</div></div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="rc" style="max-width:700px;margin-bottom:20px;">
+      <div class="fg">
+        <div class="fm">
+          <label class="fl">Chantier</label>
+          <select class="fsl2" id="prd-ch" style="width:100%;">
+            <option value="">Tous les chantiers</option>
+          </select>
+        </div>
+        <div class="fm">
+          <label class="fl">Date de debut</label>
+          <input type="date" class="fi" id="prd-de">
+        </div>
+        <div class="fm">
+          <label class="fl">Date de fin</label>
+          <input type="date" class="fi" id="prd-au">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-or" id="btn-prd-filtrer"><i class="ti ti-search"></i> Filtrer</button>
+        <button class="btn btn-gh" id="btn-prd-semaine" title="Cette semaine"><i class="ti ti-calendar-week"></i> Cette semaine</button>
+        <button class="btn btn-gh" id="btn-prd-mois" title="Ce mois"><i class="ti ti-calendar-month"></i> Ce mois</button>
+        <button class="btn btn-gh" id="btn-prd-export" style="display:none;"><i class="ti ti-file-spreadsheet"></i> Exporter Excel</button>
+      </div>
+    </div>
+
+    <!-- Résultats -->
+    <div id="prd-result"></div>
+  </div>
+
+  <div class="page" id="pg-ajout">
+    <div class="tl" style="margin-bottom:18px;"><div class="title">Ajouter un nouvel engin</div><div class="desc">Acces protege — code requis</div></div>
+    <div class="rc" style="max-width:560px;">
+      <div class="fg" style="margin-bottom:14px;">
+        <div class="fm"><label class="fl">Reference / ID *</label><input type="text" class="fi" id="new-eng-id" placeholder="ex: MP-009" style="text-transform:uppercase;"></div>
+        <div class="fm"><label class="fl">Nom *</label><input type="text" class="fi" id="new-eng-nom" placeholder="ex: PELLE 10T CASE"></div>
+        <div class="fm"><label class="fl">Categorie *</label>
+          <select class="fsl2" id="new-eng-cat">
+            <option value="Pelle">Pelle</option>
+            <option value="Chargeuse">Chargeuse</option>
+            <option value="Compacteur">Compacteur</option>
+            <option value="Pilonneuse">Pilonneuse</option>
+            <option value="Plaque vibrante">Plaque vibrante</option>
+            <option value="Groupe electrogene">Groupe electrogene</option>
+            <option value="Pompe">Pompe</option>
+            <option value="Petit materiel">Petit materiel</option>
+            <option value="Conteneur">Conteneur</option>
+            <option value="Outillage">Outillage</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="fm"><label class="fl">Cout de base/jour (€)</label><input type="number" class="fi" id="new-eng-cout" placeholder="ex: 400"></div>
+      </div>
+      <div style="margin:14px 0 10px;display:flex;align-items:center;gap:10px;"><span style="font-size:11px;font-weight:700;color:var(--or);text-transform:uppercase;">Informations machine</span><div style="flex:1;height:1px;background:var(--bd2);"></div></div>
+      <div class="fg" style="margin-bottom:14px;">
+        <div class="fm"><label class="fl">Marque</label><input type="text" class="fi" id="new-eng-marque" placeholder="ex: Volvo"></div>
+        <div class="fm"><label class="fl">Modele</label><input type="text" class="fi" id="new-eng-modele" placeholder="ex: EC220E"></div>
+        <div class="fm"><label class="fl">Annee</label><input type="number" class="fi" id="new-eng-annee" placeholder="ex: 2024"></div>
+        <div class="fm"><label class="fl">N° serie / chassis</label><input type="text" class="fi" id="new-eng-serie" placeholder="Numero de serie"></div>
+        <div class="fm full"><label class="fl">Immatriculation</label><input type="text" class="fi" id="new-eng-immat" placeholder="ex: AB-123-CD"></div>
+      </div>
+      <button class="btn btn-or" id="btn-create-eng"><i class="ti ti-plus"></i> Creer l engin</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL AFFECTATION -->
+<div class="overlay" id="ov-affect">
+  <div class="modal">
+    <div class="mhead"><span class="mtitle" id="mt-affect">NOUVELLE AFFECTATION</span><button class="mclose" id="mc-affect"><i class="ti ti-x"></i></button></div>
+    <div class="mbody">
+      <div class="fg">
+        <div class="fm"><label class="fl">Date *</label><input type="date" class="fi" id="a-date"></div>
+        <div class="fm"><label class="fl">Engin *</label><select class="fsl2" id="a-engin"><option value="">Selectionner...</option></select></div>
+        <div class="fm" id="fm-chantier"><label class="fl">Chantier *</label>
+          <div style="display:flex;gap:6px;"><select class="fsl2" id="a-ch" style="flex:1"><option value="">Selectionner...</option></select>
+          <button class="btn btn-or btn-sm" id="btn-add-ch" style="padding:8px 12px;">+</button></div>
+        </div>
+        <div class="fm"><label class="fl">Statut</label><select class="fsl2" id="a-stat"><option value="en-chantier">En chantier</option><option value="disponible">Disponible</option><option value="en-panne">En panne</option><option value="entretien">Entretien</option><option value="vendu">Vendu</option><option value="hors-parc">Hors parc</option><option value="depot">Au depot</option></select></div>
+        <div class="fm"><label class="fl">Cout/jour (€ HT)</label><input type="number" class="fi" id="a-cout" placeholder="ex: 350"></div>
+        <div class="fm"><label class="fl">Operateur</label><input type="text" class="fi" id="a-op" placeholder="Nom"></div>
+        <div class="fm full"><label class="fl">Notes</label><input type="text" class="fi" id="a-notes" placeholder="Observations..."></div>
+      </div>
+      <div class="mfoot">
+        <button class="btn btn-gh" id="btn-cancel-affect">Annuler</button>
+        <button class="btn btn-or" id="btn-save-affect"><i class="ti ti-device-floppy"></i> Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- MODAL DETAIL -->
+<div class="overlay" id="ov-detail">
+  <div class="modal" style="max-width:700px">
+    <div class="mhead"><span class="mtitle" id="mt-detail">DETAIL</span><button class="mclose" id="mc-detail"><i class="ti ti-x"></i></button></div>
+    <div class="mbody" id="mb-detail"></div>
+  </div>
+</div>
+<!-- MODAL PIN ACCES SUPPRESSION -->
+<div class="pin-overlay" id="ov-pin">
+  <div class="pin-box">
+    <i class="ti ti-lock"></i>
+    <h3>Acces protege</h3>
+    <p>Code requis pour supprimer un engin.<br>Reserve a Gedeon / direction.</p>
+    <input type="password" class="pin-input" id="pin-input" maxlength="6" inputmode="numeric" placeholder="••••">
+    <div class="pin-err" id="pin-err"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-gh" id="pin-cancel" style="flex:1;">Annuler</button>
+      <button class="btn btn-or" id="pin-confirm" style="flex:1;">Valider</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"><i class="ti ti-check"></i><span id="t-msg"></span></div>
+
+<script>
+var SU = 'https://script.google.com/macros/s/AKfycbzGCpggMH3OKymB4_ZBxNYRLbTZVzQdiYXCzIwdbxdWRyb61x8w6vMUdBLRB1wuowoyHw/exec';
+var ENGINS = [
+  {id:'MP-004',nom:'PELLE 13T VOLVO',cat:'Pelle',icon:'🦾',coutBase:600.0},
+  {id:'MP-007',nom:'PELLE 8T + BRH JCB',cat:'Pelle',icon:'🦾',coutBase:480.0},
+  {id:'MP-003',nom:'PELLE 8T VOLVO',cat:'Pelle',icon:'🦾',coutBase:400.0},
+  {id:'MP-002',nom:'PELLE 5T + BRH VOLVO',cat:'Pelle',icon:'🦾',coutBase:350.0},
+  {id:'MP-001',nom:'PELLE 3T5 VOLVO',cat:'Pelle',icon:'🦾',coutBase:250.0},
+  {id:'MP-005',nom:'PELLE 5T HITACHI',cat:'Pelle',icon:'🦾',coutBase:300.0},
+  {id:'MP-006',nom:'PELLE 2T HITACHI',cat:'Pelle',icon:'🦾',coutBase:100.0},
+  {id:'MP-008',nom:'PELLE 15T JCB',cat:'Pelle',icon:'🦾',coutBase:640.0},
+  {id:'CG-005',nom:'CHARGEUSE JCB',cat:'Chargeuse',icon:'🚜',coutBase:250.0},
+  {id:'CG-004',nom:'CHARGEUSE L30H VOLVO 1',cat:'Chargeuse',icon:'🚜',coutBase:250.0},
+  {id:'CG-003',nom:'CHARGEUSE L30H VOLVO 2',cat:'Chargeuse',icon:'🚜',coutBase:250.0},
+  {id:'CG-001',nom:'CHARGEUSE L30H VOLVO 3',cat:'Chargeuse',icon:'🚜',coutBase:250.0},
+  {id:'CG-002',nom:'CHARGEUSE L30G VOLVO 4',cat:'Chargeuse',icon:'🚜',coutBase:250.0},
+  {id:'RL120-002',nom:'COMPACTEUR 120 VOLVO',cat:'Compacteur',icon:'🔄',coutBase:200.0},
+  {id:'RL120-001',nom:'COMPACTEUR 120 BOMAG',cat:'Compacteur',icon:'🔄',coutBase:200.0},
+  {id:'RL-001',nom:'COMPACTEUR 65 AMMAN',cat:'Compacteur',icon:'🔄',coutBase:60.0},
+  {id:'RL-003',nom:'COMPACTEUR 65 BOMAG 01',cat:'Compacteur',icon:'🔄',coutBase:60.0},
+  {id:'RL-002',nom:'COMPACTEUR 65 BOMAG 02',cat:'Compacteur',icon:'🔄',coutBase:60.0},
+  {id:'PM-002',nom:'PIED DE MOUTON BOMAG',cat:'Compacteur',icon:'🔄',coutBase:150.0},
+  {id:'PM-001',nom:'PIED DE MOUTON AMMANN',cat:'Compacteur',icon:'🔄',coutBase:150.0},
+  {id:'PL-005',nom:'PILONNEUSE MIKASA',cat:'Pilonneuse',icon:'🔨',coutBase:40.0},
+  {id:'PL-001',nom:'PILONNEUSE ROUGE 1',cat:'Pilonneuse',icon:'🔨',coutBase:40.0},
+  {id:'PL-003',nom:'PILONNEUSE BOMAG 01',cat:'Pilonneuse',icon:'🔨',coutBase:40.0},
+  {id:'PL-004',nom:'PILONNEUSE DYNAPAC',cat:'Pilonneuse',icon:'🔨',coutBase:40.0},
+  {id:'PL-002',nom:'PILONNEUSE ROUGE 2',cat:'Pilonneuse',icon:'🔨',coutBase:40.0},
+  {id:'PV-001',nom:'PLAQUE BOMAG 1',cat:'Plaque vibrante',icon:'📳',coutBase:40.0},
+  {id:'PV-004',nom:'PLAQUE DYNAPAC 1',cat:'Plaque vibrante',icon:'📳',coutBase:40.0},
+  {id:'PV-002',nom:'PLAQUE BOMAG 2',cat:'Plaque vibrante',icon:'📳',coutBase:40.0},
+  {id:'PV-003',nom:'PLAQUE BOMAG 3',cat:'Plaque vibrante',icon:'📳',coutBase:40.0},
+  {id:'PV-005',nom:'PLAQUE DYNAPAC 2',cat:'Plaque vibrante',icon:'📳',coutBase:40.0},
+  {id:'GE-004',nom:'GROUPE ELECTROGENE 1',cat:'Groupe electrogene',icon:'⚡',coutBase:40.0},
+  {id:'GE-001',nom:'GROUPE ELECTROGENE 2',cat:'Groupe electrogene',icon:'⚡',coutBase:40.0},
+  {id:'GE-003',nom:'GROUPE ELECTROGENE 3',cat:'Groupe electrogene',icon:'⚡',coutBase:40.0},
+  {id:'GE-002',nom:'GROUPE ELECTROGENE 4',cat:'Groupe electrogene',icon:'⚡',coutBase:40.0},
+  {id:'PT-001',nom:'POMPE THERMIQUE 1',cat:'Pompe',icon:'💧',coutBase:40.0},
+  {id:'PT-002',nom:'POMPE THERMIQUE 2',cat:'Pompe',icon:'💧',coutBase:40.0},
+  {id:'PT-003',nom:'POMPE THERMIQUE 3',cat:'Pompe',icon:'💧',coutBase:40.0},
+  {id:'KA-001',nom:'KARCHER',cat:'Petit materiel',icon:'🧰',coutBase:80.0},
+  {id:'CT-001',nom:'CONTENEUR JAUNE',cat:'Conteneur',icon:'📦',coutBase:40.0},
+  {id:'CT-002',nom:'CONTENEUR ROUGE',cat:'Conteneur',icon:'📦',coutBase:40.0},
+  {id:'CT-003',nom:'CONTENEUR BLEU',cat:'Conteneur',icon:'📦',coutBase:40.0},
+  {id:'CT-004',nom:'CONTENEUR ORANGE',cat:'Conteneur',icon:'📦',coutBase:40.0},
+  {id:'CT-005',nom:'CONTENEUR GRIS',cat:'Conteneur',icon:'📦',coutBase:40.0},
+  {id:'MD-004',nom:'TRONCONNEUSE 1',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'MD-001',nom:'TRONCONNEUSE 2',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'MD-005',nom:'TRONCONNEUSE 3',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'MD-003',nom:'TRONCONNEUSE 4',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'MD-002',nom:'TRONCONNEUSE 5',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'MD-006',nom:'TRONCONNEUSE 6',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'LA-001',nom:'LASER 1',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'LA-002',nom:'LASER 2',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'LA-003',nom:'LASER 3',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'LA-004',nom:'LASER 4',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'CB-001',nom:'PETIT MATERIEL',cat:'Petit materiel',icon:'🧰',coutBase:0.0},
+  {id:'SC-001',nom:'COBRA',cat:'Outillage',icon:'🔧',coutBase:0.0},
+  {id:'SC-002',nom:'SCIE A SOL',cat:'Outillage',icon:'🔧',coutBase:40.0},
+  {id:'MH-001',nom:'MARTEAU PIQUEUR HIKOKI',cat:'Outillage',icon:'🔧',coutBase:0.0},
+];
+
+var affectations = {};
+var chantiers = [];
+var docsVgp = {};
+var locations = {};
+var docsCaces = {};
+var comptesRendus = {};
+var infosMachine = {};
+var factures = {};
+var PIN_CODE = '4892';
+var APP_PASSWORD = 'CAURIS2026';
+var pinPendingAction = null;
+var crPendingPhoto = null;
+var factPendingPhoto = null;
+var ctr = 0;
+function uid() { return 'aff' + (++ctr) + '_' + Date.now(); }
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+  // Verification mot de passe d'application
+  var appAuth = sessionStorage.getItem('cauris-eng-auth');
+  if (appAuth === 'ok') {
+    document.getElementById('ov-app-login').classList.remove('open');
+  }
+  document.getElementById('app-pwd-confirm').addEventListener('click', checkAppPassword);
+  document.getElementById('app-pwd-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') checkAppPassword(); });
+  setTimeout(function() { document.getElementById('app-pwd-input').focus(); }, 200);
+
+  document.getElementById('a-date').value = new Date().toISOString().split('T')[0];
+
+  // LocalStorage
+  var la = localStorage.getItem('cauris-eng-aff');
+  if (la) affectations = JSON.parse(la);
+  var lc = localStorage.getItem('cauris-eng-ch');
+  if (lc) chantiers = JSON.parse(lc);
+  var lv = localStorage.getItem('cauris-eng-vgp');
+  if (lv) docsVgp = JSON.parse(lv);
+  var lcc = localStorage.getItem('cauris-eng-caces');
+  if (lcc) docsCaces = JSON.parse(lcc);
+  var lcr = localStorage.getItem('cauris-eng-cr');
+  if (lcr) comptesRendus = JSON.parse(lcr);
+  var lim = localStorage.getItem('cauris-eng-info');
+  if (lim) infosMachine = JSON.parse(lim);
+  var lf = localStorage.getItem('cauris-eng-fact');
+  if (lf) factures = JSON.parse(lf);
+  var ll = localStorage.getItem('cauris-eng-loc');
+  if (ll) locations = JSON.parse(ll);
+  var lce = localStorage.getItem('cauris-eng-custom');
+  if (lce) {
+    var customEngins = JSON.parse(lce);
+    customEngins.forEach(function(ce) {
+      if (!ENGINS.find(function(x) { return x.id === ce.id; })) ENGINS.push(ce);
+    });
+  }
+  refreshEnginSelects();
+  refreshCh();
+  renderAll();
+  loadData();
+  setInterval(function() { loadData(); }, 20000);
+
+  // PIN modal
+  document.getElementById('pin-cancel').addEventListener('click', closePinModal);
+  document.getElementById('pin-confirm').addEventListener('click', checkPin);
+  document.getElementById('pin-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') checkPin(); });
+  document.getElementById('ov-pin').addEventListener('click', function(e) { if (e.target === this) closePinModal(); });
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var t = this.dataset.tab;
+      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+      document.querySelectorAll('.tab').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById('pg-' + t).classList.add('active');
+      document.getElementById('tab-' + t).classList.add('active');
+    });
+  });
+
+  // Boutons
+  document.getElementById('btn-refresh').addEventListener('click', loadData);
+  document.getElementById('btn-affect').addEventListener('click', function() { openAffect(null); });
+  document.getElementById('btn-affect2').addEventListener('click', function() { openAffect(null); });
+  document.getElementById('mc-affect').addEventListener('click', function() { document.getElementById('ov-affect').classList.remove('open'); });
+  document.getElementById('mc-detail').addEventListener('click', function() { document.getElementById('ov-detail').classList.remove('open'); });
+  document.getElementById('btn-cancel-affect').addEventListener('click', function() { document.getElementById('ov-affect').classList.remove('open'); });
+  document.getElementById('btn-save-affect').addEventListener('click', saveAffect);
+  document.getElementById('btn-add-ch').addEventListener('click', addCh);
+
+  // Masquer le chantier si statut ne necessite pas de chantier
+  document.getElementById('a-stat').addEventListener('change', function() {
+    toggleChantierField(this.value);
+  });
+  document.getElementById('a-engin').addEventListener('change', function() {
+    var eng = ENGINS.find(function(e) { return e.id === this.value; }.bind(this));
+    if (eng && eng.coutBase > 0) document.getElementById('a-cout').value = eng.coutBase;
+  });
+  document.getElementById('srch').addEventListener('input', renderEngins);
+  document.getElementById('dep-srch').addEventListener('input', renderDepot);
+
+  // Clic sur le compteur "Au depot" -> afficher la page depot
+  var siDepot = document.getElementById('si-depot');
+  if (siDepot) {
+    siDepot.addEventListener('click', function() {
+      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+      document.querySelectorAll('.tab').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById('pg-depot').classList.add('active');
+    });
+  }
+  document.getElementById('dep-cat').addEventListener('change', renderDepot);
+  document.getElementById('loc-srch').addEventListener('input', renderLocation);
+  document.getElementById('btn-add-loc').addEventListener('click', initLocationModal);
+  document.getElementById('mc-loc').addEventListener('click', function() { document.getElementById('ov-loc').classList.remove('open'); });
+  document.getElementById('loc-cancel').addEventListener('click', function() { document.getElementById('ov-loc').classList.remove('open'); });
+  document.getElementById('loc-save').addEventListener('click', saveLocation);
+  document.getElementById('ov-loc').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+  document.getElementById('fcat').addEventListener('change', renderEngins);
+  document.getElementById('fstat').addEventListener('change', renderEngins);
+  document.getElementById('fch').addEventListener('change', renderEngins);
+  document.getElementById('btn-create-eng').addEventListener('click', createNewEngin);
+  document.getElementById('btn-export-one').addEventListener('click', function() {
+    var id = document.getElementById('export-eng-select').value;
+    if (!id) { alert('Selectionnez un engin.'); return; }
+    exportEnginExcel(id);
+  });
+  document.getElementById('btn-export-ch').addEventListener('click', function() {
+    var ch = document.getElementById('export-ch-select').value;
+    if (!ch) { alert('Selectionnez un chantier.'); return; }
+    exportChantierExcel(ch);
+  });
+  document.getElementById('btn-export-all').addEventListener('click', exportTousEnginsExcel);
+
+  // Onglet Suivi période
+  var today = new Date();
+  var todayStr = today.toISOString().split('T')[0];
+  var firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+  document.getElementById('prd-de').value = firstDay;
+  document.getElementById('prd-au').value = todayStr;
+  document.getElementById('btn-prd-filtrer').addEventListener('click', filtrerPeriode);
+  document.getElementById('btn-prd-export').addEventListener('click', exportPeriodeExcel);
+  document.getElementById('btn-prd-semaine').addEventListener('click', function() {
+    var d = new Date();
+    var day = d.getDay() || 7;
+    var lundi = new Date(d); lundi.setDate(d.getDate() - day + 1);
+    var vendredi = new Date(lundi); vendredi.setDate(lundi.getDate() + 4);
+    document.getElementById('prd-de').value = lundi.toISOString().split('T')[0];
+    document.getElementById('prd-au').value = vendredi.toISOString().split('T')[0];
+    filtrerPeriode();
+  });
+  document.getElementById('btn-prd-mois').addEventListener('click', function() {
+    var d = new Date();
+    document.getElementById('prd-de').value = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
+    document.getElementById('prd-au').value = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
+    filtrerPeriode();
+  });
+
+  // Suppression chantier
+  document.getElementById('btn-del-ch').addEventListener('click', deleteCh);
+
+  // Fermer overlay en cliquant dehors
+  document.querySelectorAll('.overlay').forEach(function(el) {
+    el.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+  });
+});
+
+function refreshCh() {
+  ['fch', 'a-ch'].forEach(function(sid) {
+    var sel = document.getElementById(sid);
+    var v = sel.value;
+    sel.innerHTML = sid === 'fch' ? '<option value="">Tous chantiers</option>' : '<option value="">Selectionner...</option>';
+    chantiers.forEach(function(c) { var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+    sel.value = v;
+  });
+}
+
+function refreshEnginSelects() {
+  // Categories (filtre)
+  var catSet = {};
+  ENGINS.forEach(function(e) { catSet[e.cat] = 1; });
+  var cats = Object.keys(catSet).sort();
+  var fc = document.getElementById('fcat');
+  var fcVal = fc.value;
+  fc.innerHTML = '<option value="">Toutes categories</option>';
+  cats.forEach(function(c) { var o = document.createElement('option'); o.value = c; o.textContent = c; fc.appendChild(o); });
+  fc.value = fcVal;
+
+  // Engins select (formulaire affectation)
+  var ae = document.getElementById('a-engin');
+  var aeVal = ae.value;
+  ae.innerHTML = '<option value="">Selectionner...</option>';
+  ENGINS.forEach(function(e) { var o = document.createElement('option'); o.value = e.id; o.textContent = e.id + ' — ' + e.nom; ae.appendChild(o); });
+  ae.value = aeVal;
+}
+
+function addCh() {
+  var n = prompt('Nom du nouveau chantier :');
+  if (!n || !n.trim()) return;
+  n = n.trim();
+  if (chantiers.indexOf(n) >= 0) { alert('Ce chantier existe deja.'); return; }
+  chantiers.push(n);
+  localStorage.setItem('cauris-eng-ch', JSON.stringify(chantiers));
+  refreshCh();
+  document.getElementById('a-ch').value = n;
+  apiPost({type:'saveVehicle', id:'_eng_ch', record:{list:chantiers}}, null);
+  toast('Chantier "' + n + '" ajoute !');
+}
+
+// SYNC
+function loadData() {
+  setSS('loading');
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', SU, true);
+  xhr.onload = function() {
+    try {
+      var d = JSON.parse(xhr.responseText);
+      // Affectations
+      if (d.affectations) {
+        affectations = d.affectations;
+        localStorage.setItem('cauris-eng-aff', JSON.stringify(affectations));
+      }
+      // Chantiers engins
+      if (d['_eng_ch'] && d['_eng_ch']['_eng_ch'] && d['_eng_ch']['_eng_ch'].list) {
+        chantiers = d['_eng_ch']['_eng_ch'].list;
+        localStorage.setItem('cauris-eng-ch', JSON.stringify(chantiers));
+        refreshCh();
+      }
+      // Engins ajoutes dynamiquement (par les collegues)
+      if (d['_eng_custom'] && d['_eng_custom']['_eng_custom'] && d['_eng_custom']['_eng_custom'].list) {
+        var serverCustom = d['_eng_custom']['_eng_custom'].list;
+        localStorage.setItem('cauris-eng-custom', JSON.stringify(serverCustom));
+        var addedNew = false;
+        serverCustom.forEach(function(ce) {
+          if (!ENGINS.find(function(x) { return x.id === ce.id; })) { ENGINS.push(ce); addedNew = true; }
+        });
+        if (addedNew) refreshEnginSelects();
+      }
+      // Photos VGP (cles _vgp_ENGINID)
+      if (d.vehicles) {
+        Object.keys(d.vehicles).forEach(function(k) {
+          if (k.indexOf('_vgp_') === 0) {
+            var eid = k.substring(5);
+            docsVgp[eid] = d.vehicles[k].photos || [];
+          } else if (k.indexOf('_caces_') === 0) {
+            var eid2 = k.substring(7);
+            docsCaces[eid2] = d.vehicles[k].photos || [];
+          } else if (k.indexOf('cr_') === 0) {
+            comptesRendus[k] = d.vehicles[k];
+          } else if (k.indexOf('_info_') === 0) {
+            var eid3 = k.substring(6);
+            infosMachine[eid3] = d.vehicles[k];
+          } else if (k.indexOf('fact_') === 0) {
+            factures[k] = d.vehicles[k];
+          } else if (k.indexOf('loc_') === 0) {
+            locations[k] = d.vehicles[k];
+          }
+        });
+        localStorage.setItem('cauris-eng-vgp', JSON.stringify(docsVgp));
+        localStorage.setItem('cauris-eng-caces', JSON.stringify(docsCaces));
+        localStorage.setItem('cauris-eng-cr', JSON.stringify(comptesRendus));
+        localStorage.setItem('cauris-eng-info', JSON.stringify(infosMachine));
+        localStorage.setItem('cauris-eng-fact', JSON.stringify(factures));
+        localStorage.setItem('cauris-eng-loc', JSON.stringify(locations));
+      }
+      renderAll();
+      setSS('online');
+      var now = new Date();
+      document.getElementById('stxt').textContent = 'Sync ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    } catch(e) {
+      setSS('offline');
+    }
+  };
+  xhr.onerror = function() { setSS('offline'); };
+  xhr.send();
+}
+
+function apiPost(p, cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', SU, true);
+  xhr.onload = function() { setSS('online'); if (cb) cb(); };
+  xhr.onerror = function() { setSS('offline'); };
+  xhr.send(JSON.stringify(p));
+}
+
+function setSS(s) {
+  var d = document.getElementById('dot'), t = document.getElementById('stxt');
+  if (s === 'online') { d.className = 'dot on'; }
+  else if (s === 'loading' || s === 'saving') { d.className = 'dot sv'; t.textContent = s === 'saving' ? 'Sauvegarde...' : 'Chargement...'; }
+  else { d.className = 'dot'; t.textContent = 'Hors ligne'; }
+}
+
+function toast(msg) {
+  document.getElementById('t-msg').textContent = msg;
+  var t = document.getElementById('toast'); t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+function renderAll() { renderStats(); renderEngins(); renderChantiers(); renderDepot(); renderLocation(); renderJournal(); renderRapport(); initPeriodeSelects(); }
+
+// =====================
+// SUIVI PAR PERIODE
+// =====================
+var prdResults = []; // stocke les résultats du dernier filtre pour l'export
+
+function initPeriodeSelects() {
+  var sel = document.getElementById('prd-ch');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">Tous les chantiers</option>';
+  var chSet = {};
+  Object.values(affectations).forEach(function(a) { if (a.chantier) chSet[a.chantier] = 1; });
+  Object.keys(chSet).sort().forEach(function(c) {
+    var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o);
+  });
+  sel.value = cur;
+
+  // Remplir aussi le select suppression chantier
+  var selDel = document.getElementById('del-ch-select');
+  if (selDel) {
+    var curDel = selDel.value;
+    selDel.innerHTML = '<option value="">Choisir un chantier...</option>';
+    chantiers.forEach(function(c) {
+      var o = document.createElement('option'); o.value = c; o.textContent = c; selDel.appendChild(o);
+    });
+    selDel.value = curDel;
+  }
+}
+
+function filtrerPeriode() {
+  var ch  = document.getElementById('prd-ch').value;
+  var de  = document.getElementById('prd-de').value;
+  var au  = document.getElementById('prd-au').value;
+  var result = document.getElementById('prd-result');
+  var btnExp = document.getElementById('btn-prd-export');
+
+  if (!de || !au) { alert('Veuillez saisir une date de debut et une date de fin.'); return; }
+  if (de > au) { alert('La date de debut doit etre anterieure a la date de fin.'); return; }
+
+  var sL = {disponible:'Disponible','en-chantier':'En chantier','en-panne':'En panne',entretien:'Entretien',vendu:'Vendu','hors-parc':'Hors parc',depot:'Au depot'};
+  var eM = {}; ENGINS.forEach(function(e) { eM[e.id] = e; });
+
+  var filtered = Object.entries(affectations).filter(function(x) {
+    var a = x[1];
+    if (!a.date) return false;
+    if (ch && a.chantier !== ch) return false;
+    return a.date >= de && a.date <= au;
+  });
+
+  prdResults = filtered;
+
+  if (!filtered.length) {
+    result.innerHTML = '<div class="empty"><i class="ti ti-calendar-off"></i><p>Aucun engin trouve pour cette periode</p></div>';
+    btnExp.style.display = 'none';
+    return;
+  }
+
+  filtered.sort(function(a,b) {
+    var d = (a[1].date||'').localeCompare(b[1].date||'');
+    return d !== 0 ? d : (a[1].enginId||'').localeCompare(b[1].enginId||'');
+  });
+
+  var chantiersSeen = {}, enginsSeen = {};
+  filtered.forEach(function(x) {
+    if (x[1].chantier) chantiersSeen[x[1].chantier] = 1;
+    if (x[1].enginId)  enginsSeen[x[1].enginId] = 1;
+  });
+  var totalCout = filtered.reduce(function(s,x) { return s + (parseFloat(x[1].cout)||0); }, 0);
+
+  var h = '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;">' +
+    '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px 20px;">' +
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:26px;font-weight:700;color:var(--or);">' + filtered.length + '</div>' +
+      '<div style="font-size:10px;color:var(--tx3);text-transform:uppercase;">Affectations</div>' +
+    '</div>' +
+    '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px 20px;">' +
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:26px;font-weight:700;color:#60A5FA;">' + Object.keys(enginsSeen).length + '</div>' +
+      '<div style="font-size:10px;color:var(--tx3);text-transform:uppercase;">Engins distincts</div>' +
+    '</div>' +
+    '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px 20px;">' +
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:26px;font-weight:700;color:#34D399;">' + Object.keys(chantiersSeen).length + '</div>' +
+      '<div style="font-size:10px;color:var(--tx3);text-transform:uppercase;">Chantiers</div>' +
+    '</div>' +
+    '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px 20px;">' +
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:26px;font-weight:700;color:var(--or);">' + totalCout.toLocaleString('fr-FR') + ' \u20ac</div>' +
+      '<div style="font-size:10px;color:var(--tx3);text-transform:uppercase;">Cout cumule</div>' +
+    '</div>' +
+  '</div>';
+
+  h += '<div class="tw"><table><thead><tr>' +
+    '<th>Date</th><th>Engin</th><th>Nom</th><th>Categorie</th><th>Chantier</th><th>Statut</th><th>Cout/j</th><th>Operateur</th>' +
+  '</tr></thead><tbody>';
+
+  filtered.forEach(function(x) {
+    var a = x[1], eng = eM[a.enginId] || {};
+    var cout = a.cout ? parseFloat(a.cout).toLocaleString('fr-FR') + ' \u20ac' : '\u2014';
+    h += '<tr>' +
+      '<td>' + fmtD(a.date) + '</td>' +
+      '<td style="font-weight:700;color:var(--or);">' + (a.enginId||'\u2014') + '</td>' +
+      '<td>' + (eng.nom||'\u2014') + '</td>' +
+      '<td>' + (eng.cat||'\u2014') + '</td>' +
+      '<td>' + (a.chantier||'\u2014') + '</td>' +
+      '<td><span class="bdg ' + (a.status||'') + '">' + (sL[a.status]||a.status||'') + '</span></td>' +
+      '<td style="text-align:right;color:var(--or);font-weight:600;">' + cout + '</td>' +
+      '<td>' + (a.operateur||'\u2014') + '</td>' +
+    '</tr>';
+  });
+  h += '</tbody></table></div>';
+  result.innerHTML = h;
+  btnExp.style.display = 'inline-flex';
+}
+
+function exportPeriodeExcel() {
+  if (!prdResults.length) { alert('Aucun resultat a exporter.'); return; }
+
+  var sL = {disponible:'Disponible','en-chantier':'En chantier','en-panne':'En panne',entretien:'Entretien',vendu:'Vendu','hors-parc':'Hors parc',depot:'Au depot'};
+  var eM = {}; ENGINS.forEach(function(e) { eM[e.id] = e; });
+
+  var de = document.getElementById('prd-de').value;
+  var au = document.getElementById('prd-au').value;
+  var ch = document.getElementById('prd-ch').value;
+  var periode = fmtD(de) + ' au ' + fmtD(au);
+
+  var rows = [['Date', 'ID Engin', 'Nom', 'Categorie', 'Chantier', 'Statut', 'Cout/j (\u20ac)', 'Operateur', 'Notes']];
+  prdResults.forEach(function(x) {
+    var a = x[1], eng = eM[a.enginId] || {};
+    rows.push([fmtD(a.date), a.enginId||'', eng.nom||'', eng.cat||'', a.chantier||'', sL[a.status]||a.status||'', a.cout ? parseFloat(a.cout) : 0, a.operateur||'', a.notes||'']);
+  });
+  var totalCout = prdResults.reduce(function(s,x) { return s + (parseFloat(x[1].cout)||0); }, 0);
+  rows.push(['', '', '', '', '', 'TOTAL', totalCout, '', prdResults.length + ' affectation(s)']);
+
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:12},{wch:22},{wch:16},{wch:22},{wch:14},{wch:12},{wch:16},{wch:24}];
+
+  var byEngin = {};
+  prdResults.forEach(function(x) {
+    var a = x[1];
+    if (!byEngin[a.enginId]) byEngin[a.enginId] = {count:0, cout:0, eng:eM[a.enginId]||{}};
+    byEngin[a.enginId].count++;
+    byEngin[a.enginId].cout += parseFloat(a.cout)||0;
+  });
+  var synthRows = [['ID Engin', 'Nom', 'Categorie', 'Nb jours', 'Cout cumule (\u20ac)']];
+  Object.keys(byEngin).sort().forEach(function(eid) {
+    var d = byEngin[eid];
+    synthRows.push([eid, d.eng.nom||'', d.eng.cat||'', d.count, d.cout]);
+  });
+  synthRows.push(['', '', 'TOTAL', prdResults.length, totalCout]);
+  var wsSynth = XLSX.utils.aoa_to_sheet(synthRows);
+  wsSynth['!cols'] = [{wch:12},{wch:22},{wch:16},{wch:12},{wch:16}];
+
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Detail ' + (ch||'tous').substring(0,20));
+  XLSX.utils.book_append_sheet(wb, wsSynth, 'Synthese par engin');
+  var dt = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, 'CAURIS_Periode_' + (ch||'tous').replace(/[^a-zA-Z0-9]/g,'_') + '_' + de + '_' + au + '.xlsx');
+  toast('Export Excel genere !');
+}
+
+// =====================
+// SUPPRESSION D'UN CHANTIER
+// =====================
+function deleteCh() {
+  var sel = document.getElementById('del-ch-select');
+  var nom = sel ? sel.value : '';
+  if (!nom) { alert('Selectionnez un chantier a supprimer.'); return; }
+  if (!confirm('Supprimer le chantier "' + nom + '" de la liste ?\n\nLes affectations existantes ne seront pas modifiees.')) return;
+  chantiers = chantiers.filter(function(c) { return c !== nom; });
+  localStorage.setItem('cauris-eng-ch', JSON.stringify(chantiers));
+  apiPost({type:'saveVehicle', id:'_eng_ch', record:{list:chantiers}}, function() { setTimeout(loadData, 1000); });
+  refreshCh();
+  initPeriodeSelects();
+  renderChantiers();
+  toast('Chantier "' + nom + '" supprime');
+}
+
+function renderDepot() {
+  var srch = (document.getElementById('dep-srch') ? document.getElementById('dep-srch').value : '').toLowerCase();
+  var cat = document.getElementById('dep-cat') ? document.getElementById('dep-cat').value : '';
+
+  // Construire la map derniere affectation par engin
+  var derniere = {};
+  Object.values(affectations).forEach(function(a) {
+    if (!a.enginId) return;
+    if (!derniere[a.enginId] || a.date > derniere[a.enginId].date) derniere[a.enginId] = a;
+  });
+
+  // Engins dont le dernier statut est "depot"
+  var auDepot = ENGINS.filter(function(e) {
+    var last = derniere[e.id];
+    return last && last.status === 'depot';
+  });
+
+  // Stats
+  var cats = {};
+  auDepot.forEach(function(e) { cats[e.cat] = 1; });
+  var depCount = document.getElementById('dep-count');
+  var depCatCount = document.getElementById('dep-cat-count');
+  if (depCount) depCount.textContent = auDepot.length;
+  if (depCatCount) depCatCount.textContent = Object.keys(cats).length;
+
+  // Remplir filtre categorie depot
+  var depCatSel = document.getElementById('dep-cat');
+  if (depCatSel) {
+    var curV = depCatSel.value;
+    depCatSel.innerHTML = '<option value="">Toutes categories</option>';
+    Object.keys(cats).sort().forEach(function(c) {
+      var o = document.createElement('option'); o.value = c; o.textContent = c; depCatSel.appendChild(o);
+    });
+    depCatSel.value = curV;
+  }
+
+  // Filtrer
+  var filtered = auDepot.filter(function(e) {
+    return (!srch || e.id.toLowerCase().includes(srch) || e.nom.toLowerCase().includes(srch)) &&
+           (!cat || e.cat === cat);
+  });
+
+  var grid = document.getElementById('dep-grid');
+  if (!grid) return;
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-building-warehouse"></i><p>Aucun engin au depot</p></div>';
+    return;
+  }
+
+  var sL = {disponible:'✅ Disponible','en-chantier':'🔨 En chantier','en-panne':'❌ En panne',entretien:'🔧 Entretien',vendu:'💰 Vendu','hors-parc':'🚫 Hors parc',depot:'🏭 Au depot'};
+
+  var h = '';
+  filtered.forEach(function(e) {
+    var last = derniere[e.id];
+    var dateSince = last ? fmtD(last.date) : '—';
+    var notes = last ? (last.notes || '') : '';
+    h += '<div class="card" data-eid="' + e.id + '">' +
+      '<div class="card-top">' +
+        '<div class="cat-icon">' + e.icon + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="eid">' + e.id + '</div>' +
+          '<div class="enom">' + e.nom + '</div>' +
+          '<div class="ecat">' + e.cat + '</div>' +
+        '</div>' +
+        '<span class="bdg depot">🏭 Au depot</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-stats">' +
+          '<div class="cs"><div class="l">Au depot depuis</div><div class="v">' + dateSince + '</div></div>' +
+          '<div class="cs"><div class="l">Cout de base/j</div><div class="v hl">' + (e.coutBase ? e.coutBase.toLocaleString('fr-FR') + ' €' : '—') + '</div></div>' +
+        '</div>' +
+        (notes ? '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px;"><i class="ti ti-note"></i> ' + notes + '</div>' : '') +
+        '<div class="card-actions">' +
+          '<button class="ba btn-aff-dep" data-eid="' + e.id + '"><i class="ti ti-crane"></i> Affecter</button>' +
+          '<button class="ba btn-det-dep" data-eid="' + e.id + '"><i class="ti ti-file-description"></i> Detail</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  grid.innerHTML = h;
+
+  grid.querySelectorAll('.btn-aff-dep').forEach(function(btn) {
+    btn.addEventListener('click', function(ev) { ev.stopPropagation(); openAffect(this.dataset.eid); });
+  });
+  grid.querySelectorAll('.btn-det-dep').forEach(function(btn) {
+    btn.addEventListener('click', function(ev) { ev.stopPropagation(); openDetail(this.dataset.eid); });
+  });
+  grid.querySelectorAll('.card').forEach(function(card) {
+    card.addEventListener('click', function(ev) {
+      if (ev.target.closest('.card-actions')) return;
+      openDetail(this.dataset.eid);
+    });
+  });
+}
+
+// =====================
+// LOCATION D'ENGINS
+// =====================
+function renderLocation() {
+  var srch = (document.getElementById('loc-srch') ? document.getElementById('loc-srch').value : '').toLowerCase();
+  var grid = document.getElementById('loc-grid');
+  var locCount = document.getElementById('loc-count');
+  var locCout = document.getElementById('loc-cout');
+  if (!grid) return;
+
+  // Locations actives (pas de date fin ou date fin dans le futur)
+  var today = new Date().toISOString().split('T')[0];
+  var actives = Object.entries(locations).filter(function(x) {
+    var l = x[1];
+    return !l.fin || l.fin >= today;
+  });
+
+  // Stats
+  var totalCout = actives.reduce(function(s,x) { return s + (parseFloat(x[1].coutJour)||0); }, 0);
+  if (locCount) locCount.textContent = actives.length;
+  if (locCout) locCout.textContent = totalCout.toLocaleString('fr-FR') + ' €';
+
+  // Filtre recherche
+  var filtered = actives.filter(function(x) {
+    var l = x[1];
+    return !srch || (l.enginId && l.enginId.toLowerCase().includes(srch)) ||
+           (l.enginNom && l.enginNom.toLowerCase().includes(srch)) ||
+           (l.chantier && l.chantier.toLowerCase().includes(srch)) ||
+           (l.loueur && l.loueur.toLowerCase().includes(srch));
+  });
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-key"></i><p>Aucune location en cours</p></div>';
+    return;
+  }
+
+  var eM = {}; ENGINS.forEach(function(e) { eM[e.id] = e; });
+  var h = '';
+  filtered.sort(function(a,b) { return (b[1].debut||'').localeCompare(a[1].debut||''); });
+  filtered.forEach(function(x) {
+    var lid = x[0], l = x[1];
+    var eng = eM[l.enginId];
+    h += '<div class="card">' +
+      '<div class="card-top">' +
+        '<div class="cat-icon">' + (eng ? eng.icon : '🔑') + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="eid">' + l.enginId + '</div>' +
+          '<div class="enom">' + l.enginNom + '</div>' +
+          '<div class="ecat">' + (eng ? eng.cat : '') + '</div>' +
+        '</div>' +
+        '<span class="bdg" style="background:rgba(59,130,246,.15);color:#60A5FA;">En location</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-stats">' +
+          '<div class="cs"><div class="l">Chantier</div><div class="v">' + (l.chantier||'—') + '</div></div>' +
+          '<div class="cs"><div class="l">Cout/jour</div><div class="v hl">' + (l.coutJour ? parseFloat(l.coutJour).toLocaleString('fr-FR') + ' €' : '—') + '</div></div>' +
+          '<div class="cs"><div class="l">Loueur</div><div class="v">' + (l.loueur||'—') + '</div></div>' +
+          '<div class="cs"><div class="l">Du / Au</div><div class="v">' + fmtD(l.debut) + (l.fin ? ' → ' + fmtD(l.fin) : '') + '</div></div>' +
+        '</div>' +
+        (l.notes ? '<div style="font-size:11px;color:var(--tx3);margin-bottom:10px;"><i class="ti ti-note"></i> ' + l.notes + '</div>' : '') +
+        '<div class="card-actions">' +
+          '<button class="ba loc-end-btn" data-lid="' + lid + '" style="color:var(--ro);border-color:rgba(239,68,68,.3);"><i class="ti ti-x"></i> Terminer</button>' +
+          '<button class="ba loc-del-btn" data-lid="' + lid + '"><i class="ti ti-trash"></i> Supprimer</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  grid.innerHTML = h;
+
+  grid.querySelectorAll('.loc-end-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lid = this.dataset.lid;
+      if (!confirm('Marquer cette location comme terminee ?')) return;
+      locations[lid].fin = today;
+      localStorage.setItem('cauris-eng-loc', JSON.stringify(locations));
+      apiPost({type:'saveVehicle', id:lid, record:locations[lid]}, function() { setTimeout(loadData, 1000); });
+      renderLocation();
+      toast('Location terminee');
+    });
+  });
+  grid.querySelectorAll('.loc-del-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lid = this.dataset.lid;
+      askPin(function() {
+        delete locations[lid];
+        localStorage.setItem('cauris-eng-loc', JSON.stringify(locations));
+        apiPost({type:'delete', sheet:'vehicles', id:lid}, null);
+        renderLocation();
+        toast('Location supprimee');
+      });
+    });
+  });
+}
+
+function initLocationModal() {
+  var modal = document.getElementById('ov-loc');
+
+  // Remplir les selects
+  var sel = document.getElementById('loc-engin');
+  sel.innerHTML = '<option value="">Selectionner un engin...</option>';
+  ENGINS.forEach(function(e) {
+    var o = document.createElement('option'); o.value = e.id; o.textContent = e.id + ' — ' + e.nom; sel.appendChild(o);
+  });
+  var selCh = document.getElementById('loc-ch');
+  selCh.innerHTML = '<option value="">Selectionner un chantier...</option>';
+  chantiers.forEach(function(c) { var o = document.createElement('option'); o.value = c; o.textContent = c; selCh.appendChild(o); });
+
+  // Dates par défaut
+  document.getElementById('loc-debut').value = new Date().toISOString().split('T')[0];
+  document.getElementById('loc-fin').value = '';
+  document.getElementById('loc-loueur').value = '';
+  document.getElementById('loc-cout-j').value = '';
+  document.getElementById('loc-notes').value = '';
+
+  modal.classList.add('open');
+}
+
+function saveLocation() {
+  var enginId = document.getElementById('loc-engin').value;
+  var ch = document.getElementById('loc-ch').value;
+  var debut = document.getElementById('loc-debut').value;
+  var loueur = document.getElementById('loc-loueur').value.trim();
+  var coutJour = parseFloat(document.getElementById('loc-cout-j').value);
+
+  if (!enginId || !ch || !debut || !loueur || !coutJour) {
+    alert('Engin, chantier, date debut, loueur et cout obligatoires.');
+    return;
+  }
+
+  var eng = ENGINS.find(function(e) { return e.id === enginId; });
+  var lid = 'loc_' + Date.now();
+  var data = {
+    enginId: enginId,
+    enginNom: eng ? eng.nom : enginId,
+    chantier: ch,
+    debut: debut,
+    fin: document.getElementById('loc-fin').value || '',
+    loueur: loueur,
+    coutJour: coutJour,
+    notes: document.getElementById('loc-notes').value.trim()
+  };
+
+  locations[lid] = data;
+  localStorage.setItem('cauris-eng-loc', JSON.stringify(locations));
+  apiPost({type:'saveVehicle', id:lid, record:data}, function() {
+    toast('Location enregistree !');
+    setTimeout(loadData, 1000);
+  });
+  document.getElementById('ov-loc').classList.remove('open');
+  renderLocation();
+}
+
+// HELPERS
+function getSt(id) {
+  var a = Object.values(affectations).filter(function(x) { return x.enginId === id; }).sort(function(a,b) { return b.date.localeCompare(a.date); });
+  return a.length ? a[0].status : 'disponible';
+}
+function getCh(id) {
+  var a = Object.values(affectations).filter(function(x) { return x.enginId === id; }).sort(function(a,b) { return b.date.localeCompare(a.date); });
+  return (a.length && a[0].status === 'en-chantier') ? a[0].chantier : '—';
+}
+function getCout(id) {
+  var a = Object.values(affectations).filter(function(x) { return x.enginId === id; }).sort(function(a,b) { return b.date.localeCompare(a.date); });
+  return a.length ? (parseFloat(a[0].cout) || 0) : 0;
+}
+function fmtD(d) { if (!d) return '—'; var p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function fmtE(n) { return n ? parseFloat(n).toLocaleString('fr-FR') + ' €' : '—'; }
+
+// STATS
+function renderStats() {
+  var st = ENGINS.map(function(e) { return getSt(e.id); });
+  var sTotal = document.getElementById('s-total');
+  if (sTotal) sTotal.textContent = ENGINS.length;
+  document.getElementById('s-dispo').textContent = st.filter(function(s) { return s === 'disponible'; }).length;
+  document.getElementById('s-ch').textContent = st.filter(function(s) { return s === 'en-chantier'; }).length;
+  document.getElementById('s-panne').textContent = st.filter(function(s) { return s === 'en-panne' || s === 'entretien'; }).length;
+  var sDepot = document.getElementById('s-depot');
+  if (sDepot) sDepot.textContent = st.filter(function(s) { return s === 'depot'; }).length;
+  var tc = ENGINS.reduce(function(s,e) { return s + getCout(e.id); }, 0);
+  document.getElementById('s-cout').textContent = tc.toLocaleString('fr-FR') + ' €';
+}
+
+// ENGINS GRID
+function renderEngins() {
+  var sr = (document.getElementById('srch').value || '').toLowerCase();
+  var fc = document.getElementById('fcat').value;
+  var fs = document.getElementById('fstat').value;
+  var fch = document.getElementById('fch').value;
+  var sL = {disponible:'Disponible','en-chantier':'En chantier','en-panne':'En panne',entretien:'Entretien',vendu:'Vendu','hors-parc':'Hors parc',depot:'Au depot'};
+  var fil = ENGINS.filter(function(e) {
+    return (!sr || e.id.toLowerCase().includes(sr) || e.nom.toLowerCase().includes(sr)) &&
+           (!fc || e.cat === fc) && (!fs || getSt(e.id) === fs) && (!fch || getCh(e.id) === fch);
+  });
+  var g = document.getElementById('eg');
+  if (!fil.length) { g.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-tools"></i><p>Aucun engin</p></div>'; return; }
+  var h = '';
+  fil.forEach(function(e) {
+    var st = getSt(e.id), ch = getCh(e.id), cout = getCout(e.id);
+    h += '<div class="card" data-eid="' + e.id + '">' +
+      '<div class="card-top">' +
+        '<div class="cat-icon">' + e.icon + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="eid">' + e.id + '</div>' +
+          '<div class="enom">' + e.nom + '</div>' +
+          '<div class="ecat">' + e.cat + '</div>' +
+        '</div>' +
+        '<span class="bdg ' + st + '">' + sL[st] + '</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-stats">' +
+          '<div class="cs"><div class="l">Chantier</div><div class="v">' + ch + '</div></div>' +
+          '<div class="cs"><div class="l">' + (st==='en-chantier' ? 'Cout facture/j' : 'Cout base/j') + '</div><div class="v hl">' + ((st==='en-chantier' && cout) ? cout.toLocaleString('fr-FR') + ' €' : (e.coutBase ? e.coutBase.toLocaleString('fr-FR') + ' €' : '—')) + '</div></div>' +
+        '</div>' +
+        '<div class="card-actions">' +
+          '<button class="ba btn-aff" data-eid="' + e.id + '"><i class="ti ti-plus"></i> Affecter</button>' +
+          '<button class="ba btn-det" data-eid="' + e.id + '"><i class="ti ti-file-description"></i> Detail</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  g.innerHTML = h;
+  g.querySelectorAll('.card').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.card-actions')) return;
+      openDetail(this.dataset.eid);
+    });
+  });
+  g.querySelectorAll('.btn-aff').forEach(function(btn) {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); openAffect(this.dataset.eid); });
+  });
+  g.querySelectorAll('.btn-det').forEach(function(btn) {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); openDetail(this.dataset.eid); });
+  });
+}
+
+// =====================
+// SYSTEME PIN (acces protege suppression)
+// =====================
+// =====================
+// MOT DE PASSE D'ACCES A L'APPLICATION
+// =====================
+function checkAppPassword() {
+  var val = document.getElementById('app-pwd-input').value;
+  if (val === APP_PASSWORD) {
+    sessionStorage.setItem('cauris-eng-auth', 'ok');
+    document.getElementById('ov-app-login').classList.remove('open');
+  } else {
+    document.getElementById('app-pwd-err').textContent = 'Mot de passe incorrect.';
+    document.getElementById('app-pwd-input').value = '';
+    document.getElementById('app-pwd-input').focus();
+  }
+}
+
+// =====================
+// CREATION D'UN NOUVEL ENGIN (protege par PIN)
+// =====================
+function createNewEngin() {
+  var id = document.getElementById('new-eng-id').value.trim().toUpperCase();
+  var nom = document.getElementById('new-eng-nom').value.trim().toUpperCase();
+  var cat = document.getElementById('new-eng-cat').value;
+  var cout = parseFloat(document.getElementById('new-eng-cout').value) || 0;
+  var marque = document.getElementById('new-eng-marque').value.trim();
+  var modele = document.getElementById('new-eng-modele').value.trim();
+  var annee = document.getElementById('new-eng-annee').value.trim();
+  var serie = document.getElementById('new-eng-serie').value.trim();
+  var immat = document.getElementById('new-eng-immat').value.trim();
+
+  if (!id || !nom || !cat) { alert('Reference, nom et categorie sont obligatoires.'); return; }
+  if (ENGINS.find(function(x) { return x.id === id; })) { alert('Cette reference existe deja.'); return; }
+
+  var catIcons = {Pelle:'🦾',Chargeuse:'🚜',Compacteur:'🔄',Pilonneuse:'🔨','Plaque vibrante':'📳','Groupe electrogene':'⚡',Pompe:'💧','Petit materiel':'🧰',Conteneur:'📦',Outillage:'🔧',Autre:'⚙️'};
+
+  askPin(function() {
+    var newEngin = { id:id, nom:nom, cat:cat, icon: catIcons[cat] || '⚙️', coutBase: cout };
+    ENGINS.push(newEngin);
+
+    if (marque || modele || annee || serie || immat) {
+      infosMachine[id] = { marque:marque, modele:modele, annee:annee, serie:serie, immat:immat };
+      localStorage.setItem('cauris-eng-info', JSON.stringify(infosMachine));
+      apiPost({type:'saveVehicle', id:'_info_'+id, record:infosMachine[id]}, null);
+    }
+
+    // Sauvegarder la liste complete des engins customs (ceux ajoutes dynamiquement)
+    var customEngins = JSON.parse(localStorage.getItem('cauris-eng-custom') || '[]');
+    customEngins.push(newEngin);
+    localStorage.setItem('cauris-eng-custom', JSON.stringify(customEngins));
+    apiPost({type:'saveVehicle', id:'_eng_custom', record:{list:customEngins}}, function() { setTimeout(loadData, 1500); });
+
+    // Reset formulaire
+    ['new-eng-id','new-eng-nom','new-eng-cout','new-eng-marque','new-eng-modele','new-eng-annee','new-eng-serie','new-eng-immat'].forEach(function(fid) {
+      document.getElementById(fid).value = '';
+    });
+
+    refreshEnginSelects();
+    refreshCh();
+    renderAll();
+    toast('Engin "' + id + '" cree avec succes !');
+  });
+}
+
+// =====================
+// SUPPRESSION D'UN ENGIN (protege par PIN)
+// =====================
+function deleteEngin(id) {
+  var eng = ENGINS.find(function(x) { return x.id === id; });
+  if (!eng) return;
+  if (!confirm('Supprimer definitivement l engin "' + id + ' — ' + eng.nom + '" ?\\n\\nCette action retirera l engin et toutes ses donnees associees (affectations, photos, comptes-rendus, factures).')) return;
+
+  // Retirer de la liste ENGINS
+  ENGINS = ENGINS.filter(function(x) { return x.id !== id; });
+
+  // Nettoyer les donnees associees en local
+  Object.keys(affectations).forEach(function(aid) {
+    if (affectations[aid].enginId === id) {
+      delete affectations[aid];
+      apiPost({type:'delete', sheet:'affectations', id:aid}, null);
+    }
+  });
+  localStorage.setItem('cauris-eng-aff', JSON.stringify(affectations));
+
+  delete docsVgp[id];
+  delete docsCaces[id];
+  localStorage.setItem('cauris-eng-vgp', JSON.stringify(docsVgp));
+  localStorage.setItem('cauris-eng-caces', JSON.stringify(docsCaces));
+  apiPost({type:'delete', sheet:'vehicles', id:'_vgp_'+id}, null);
+  apiPost({type:'delete', sheet:'vehicles', id:'_caces_'+id}, null);
+
+  Object.keys(comptesRendus).forEach(function(crId) {
+    if (comptesRendus[crId].enginId === id) {
+      delete comptesRendus[crId];
+      apiPost({type:'delete', sheet:'vehicles', id:crId}, null);
+    }
+  });
+  localStorage.setItem('cauris-eng-cr', JSON.stringify(comptesRendus));
+
+  Object.keys(factures).forEach(function(fid) {
+    if (factures[fid].enginId === id) {
+      delete factures[fid];
+      apiPost({type:'delete', sheet:'vehicles', id:fid}, null);
+    }
+  });
+  localStorage.setItem('cauris-eng-fact', JSON.stringify(factures));
+
+  delete infosMachine[id];
+  localStorage.setItem('cauris-eng-info', JSON.stringify(infosMachine));
+  apiPost({type:'delete', sheet:'vehicles', id:'_info_'+id}, null);
+
+  // Mettre a jour la liste des engins customs si c'en etait un
+  var customEngins = JSON.parse(localStorage.getItem('cauris-eng-custom') || '[]');
+  var wasCustom = customEngins.find(function(x) { return x.id === id; });
+  if (wasCustom) {
+    customEngins = customEngins.filter(function(x) { return x.id !== id; });
+    localStorage.setItem('cauris-eng-custom', JSON.stringify(customEngins));
+    apiPost({type:'saveVehicle', id:'_eng_custom', record:{list:customEngins}}, function() { setTimeout(loadData, 1500); });
+  }
+
+  document.getElementById('ov-detail').classList.remove('open');
+  refreshEnginSelects();
+  renderAll();
+  toast('Engin "' + id + '" supprime');
+}
+
+function askPin(action) {
+  pinPendingAction = action;
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-err').textContent = '';
+  document.getElementById('ov-pin').classList.add('open');
+  setTimeout(function() { document.getElementById('pin-input').focus(); }, 100);
+}
+function closePinModal() {
+  document.getElementById('ov-pin').classList.remove('open');
+  pinPendingAction = null;
+}
+function checkPin() {
+  var val = document.getElementById('pin-input').value;
+  if (val === PIN_CODE) {
+    var action = pinPendingAction;
+    closePinModal();
+    if (action) action();
+  } else {
+    document.getElementById('pin-err').textContent = 'Code incorrect.';
+    document.getElementById('pin-input').value = '';
+  }
+}
+
+// =====================
+// ALERTE PANNE PAR EMAIL
+// =====================
+function envoyerAlertePanne(engin, chantier) {
+  var dt = new Date();
+  var dateStr = dt.toLocaleDateString('fr-FR') + ' a ' + dt.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  apiPost({
+    type: 'sendMail',
+    record: {
+      to: 'samuelmav9@gmail.com,Gedeon.danton@cauris-btp.fr,brun.assou@cauris-btp.fr',
+      subject: 'ALERTE PANNE — ' + engin.id + ' ' + engin.nom,
+      body: 'Une panne a ete signalee sur l engin suivant :\\n\\n' +
+            'Engin : ' + engin.id + ' — ' + engin.nom + '\\n' +
+            'Categorie : ' + engin.cat + '\\n' +
+            'Chantier : ' + (chantier || 'Non precise') + '\\n' +
+            'Date : ' + dateStr + '\\n\\n' +
+            'Merci de prendre les dispositions necessaires.\\n\\n— Application CAURIS Suivi Materiel'
+    }
+  }, function() {
+    toast('Alerte envoyee a Samuel, Gedeon et Brun par email !');
+  });
+}
+
+function openDetail(id) {
+  var e = ENGINS.find(function(x) { return x.id === id; }); if (!e) return;
+  crPendingPhoto = null;
+  factPendingPhoto = null;
+  var st = getSt(id), ch = getCh(id), cout = getCout(id);
+  var sL = {disponible:'✅ Disponible','en-chantier':'🔨 En chantier','en-panne':'❌ En panne',entretien:'🔧 Entretien',vendu:'💰 Vendu','hors-parc':'🚫 Hors parc',depot:'🏭 Au depot'};
+  var aff = Object.entries(affectations).filter(function(x) { return x[1].enginId === id; }).sort(function(a,b) { return b[1].date.localeCompare(a[1].date); });
+  var totC = aff.reduce(function(s,x) { return s + (parseFloat(x[1].cout) || 0); }, 0);
+  document.getElementById('mt-detail').textContent = id + ' — ' + e.nom;
+  var rows = '';
+  aff.forEach(function(x) {
+    var a = x[1];
+    rows += '<tr><td>' + fmtD(a.date) + '</td><td>' + (a.chantier||'—') + '</td><td><span class="bdg ' + a.status + '">' + (sL[a.status]||a.status) + '</span></td><td style="color:var(--or);font-weight:600">' + fmtE(a.cout) + '</td><td>' + (a.operateur||'—') + '</td><td>' + (a.notes||'—') + '</td><td><button class="ba btn-del-aff" data-aid="' + x[0] + '" style="flex:none;padding:4px 8px;font-size:11px;"><i class="ti ti-trash"></i></button></td></tr>';
+  });
+
+  var vgpPhotos = docsVgp[id] || [];
+  var cacesPhotos = docsCaces[id] || [];
+  var crList = Object.entries(comptesRendus).filter(function(x) { return x[1].enginId === id; }).sort(function(a,b) { return (b[1].date||'').localeCompare(a[1].date||''); });
+  var info = infosMachine[id] || {};
+  var factList = Object.entries(factures).filter(function(x) { return x[1].enginId === id; }).sort(function(a,b) { return (b[1].date||'').localeCompare(a[1].date||''); });
+
+  var mb = document.getElementById('mb-detail');
+  mb.innerHTML =
+    '<div class="dg">' +
+    '<div class="di"><div class="l">Reference</div><div class="v" style="font-family:Barlow Condensed,sans-serif;letter-spacing:1px;font-size:16px;color:var(--or)">' + id + '</div></div>' +
+    '<div class="di"><div class="l">Categorie</div><div class="v">' + e.cat + '</div></div>' +
+    '<div class="di"><div class="l">Statut</div><div class="v">' + (sL[st]||st) + '</div></div>' +
+    '<div class="di"><div class="l">Chantier</div><div class="v">' + ch + '</div></div>' +
+    '<div class="di"><div class="l">Cout de base/j</div><div class="v">' + (e.coutBase ? e.coutBase.toLocaleString('fr-FR')+' €' : '—') + '</div></div>' +
+    '<div class="di"><div class="l">' + (st==='en-chantier' ? 'Cout facture/j' : 'Dernier cout/j') + '</div><div class="v" style="color:var(--or)">' + fmtE(cout) + '</div></div>' +
+    '</div>' +
+    '<div class="subtabs">' +
+      '<button class="subtab active" data-sub="hist"><i class="ti ti-history"></i> Historique</button>' +
+      '<button class="subtab" data-sub="info"><i class="ti ti-info-circle"></i> Info machine</button>' +
+      '<button class="subtab" data-sub="vgp"><i class="ti ti-clipboard-check"></i> VGP <span style="opacity:.6">(' + vgpPhotos.length + ')</span></button>' +
+      '<button class="subtab" data-sub="caces"><i class="ti ti-id-badge-2"></i> CACES <span style="opacity:.6">(' + cacesPhotos.length + ')</span></button>' +
+      '<button class="subtab" data-sub="meca"><i class="ti ti-tool"></i> Mecanicien <span style="opacity:.6">(' + crList.length + ')</span></button>' +
+      '<button class="subtab" data-sub="fact"><i class="ti ti-receipt"></i> Factures <span style="opacity:.6">(' + factList.length + ')</span></button>' +
+    '</div>' +
+
+    '<div class="subpage active" id="sub-hist">' +
+      (aff.length ? '<div class="tw"><table><thead><tr><th>Date</th><th>Chantier</th><th>Statut</th><th>Cout/j</th><th>Operateur</th><th>Notes</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p style="color:var(--tx3);font-size:13px;">Aucune affectation</p>') +
+      '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);text-align:right;">' +
+        '<span style="font-size:12px;color:var(--tx3)">Cout cumule : </span><span style="font-weight:700;color:var(--or)">' + totC.toLocaleString('fr-FR') + ' €</span>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="subpage" id="sub-info">' +
+      '<div class="fg" style="margin-bottom:14px;">' +
+        '<div class="fm"><label class="fl">Marque</label><input type="text" class="fi" id="info-marque" value="' + (info.marque||'') + '" placeholder="ex: Volvo"></div>' +
+        '<div class="fm"><label class="fl">Modele</label><input type="text" class="fi" id="info-modele" value="' + (info.modele||'') + '" placeholder="ex: EC220E"></div>' +
+        '<div class="fm"><label class="fl">Annee</label><input type="number" class="fi" id="info-annee" value="' + (info.annee||'') + '" placeholder="ex: 2021"></div>' +
+        '<div class="fm"><label class="fl">N° serie / chassis</label><input type="text" class="fi" id="info-serie" value="' + (info.serie||'') + '" placeholder="Numero de serie"></div>' +
+        '<div class="fm full"><label class="fl">Immatriculation</label><input type="text" class="fi" id="info-immat" value="' + (info.immat||'') + '" placeholder="ex: AB-123-CD"></div>' +
+      '</div>' +
+      '<button class="btn btn-or btn-sm" id="btn-save-info"><i class="ti ti-device-floppy"></i> Enregistrer les informations</button>' +
+    '</div>' +
+
+    '<div class="subpage" id="sub-vgp">' +
+      '<div class="photo-grid" id="vgp-grid"></div>' +
+      '<input type="file" id="vgp-file" accept="image/*" capture="environment" style="display:none">' +
+    '</div>' +
+
+    '<div class="subpage" id="sub-caces">' +
+      '<div class="photo-grid" id="caces-grid"></div>' +
+      '<input type="file" id="caces-file" accept="image/*" capture="environment" style="display:none">' +
+    '</div>' +
+
+    '<div class="subpage" id="sub-meca">' +
+      '<button class="btn btn-or btn-sm" id="btn-add-cr" style="margin-bottom:14px;"><i class="ti ti-plus"></i> Ajouter un compte-rendu</button>' +
+      '<div id="cr-form" style="display:none;background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:14px;">' +
+        '<div class="fg" style="margin-bottom:10px;">' +
+          '<div class="fm"><label class="fl">Mecanicien *</label><input type="text" class="fi" id="cr-meca" placeholder="Nom du mecanicien"></div>' +
+          '<div class="fm"><label class="fl">Date</label><input type="date" class="fi" id="cr-date"></div>' +
+        '</div>' +
+        '<div class="fm full" style="margin-bottom:10px;"><label class="fl">Intervention</label><textarea class="fi" id="cr-texte" rows="3" placeholder="Description de l intervention..." style="resize:vertical;font-family:Inter,sans-serif;"></textarea></div>' +
+        '<button class="ba" id="btn-cr-photo" style="width:auto;padding:8px 14px;margin-bottom:10px;"><i class="ti ti-camera"></i> Ajouter une photo</button>' +
+        '<input type="file" id="cr-file" accept="image/*" capture="environment" style="display:none">' +
+        '<div id="cr-photo-preview" style="margin-bottom:10px;"></div>' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+          '<button class="btn btn-gh btn-sm" id="btn-cr-cancel">Annuler</button>' +
+          '<button class="btn btn-or btn-sm" id="btn-cr-save"><i class="ti ti-device-floppy"></i> Enregistrer</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="cr-list"></div>' +
+    '</div>' +
+
+    '<div class="subpage" id="sub-fact">' +
+      '<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">' +
+        '<button class="btn btn-or btn-sm" id="btn-add-fact"><i class="ti ti-plus"></i> Ajouter une facture</button>' +
+        (factList.length ? '<button class="btn btn-gh btn-sm" id="btn-export-fact"><i class="ti ti-file-export"></i> Exporter en PDF</button>' : '') +
+      '</div>' +
+      '<div id="fact-form" style="display:none;background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:14px;">' +
+        '<div class="fg" style="margin-bottom:10px;">' +
+          '<div class="fm"><label class="fl">Fournisseur *</label><input type="text" class="fi" id="fact-fourn" placeholder="Nom du fournisseur"></div>' +
+          '<div class="fm"><label class="fl">Date</label><input type="date" class="fi" id="fact-date"></div>' +
+          '<div class="fm"><label class="fl">Montant (€ HT) *</label><input type="number" class="fi" id="fact-montant" placeholder="0.00"></div>' +
+          '<div class="fm"><label class="fl">Piece concernee</label><input type="text" class="fi" id="fact-piece" placeholder="ex: Filtre a huile"></div>' +
+        '</div>' +
+        '<button class="ba" id="btn-fact-photo" style="width:auto;padding:8px 14px;margin-bottom:10px;"><i class="ti ti-camera"></i> Photo de la facture</button>' +
+        '<input type="file" id="fact-file" accept="image/*" capture="environment" style="display:none">' +
+        '<div id="fact-photo-preview" style="margin-bottom:10px;"></div>' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+          '<button class="btn btn-gh btn-sm" id="btn-fact-cancel">Annuler</button>' +
+          '<button class="btn btn-or btn-sm" id="btn-fact-save"><i class="ti ti-device-floppy"></i> Enregistrer</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="fact-list"></div>' +
+    '</div>' +
+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--bd);">' +
+    '<button class="btn btn-gh" id="btn-close-det">Fermer</button>' +
+    '<button class="btn" style="background:rgba(16,185,129,.12);color:#34D399;border:1px solid rgba(16,185,129,.3);" id="btn-export-det" data-eid="' + id + '"><i class="ti ti-file-spreadsheet"></i> Export Excel</button>' +
+    '<button class="btn" style="background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.25);" id="btn-del-engin" data-eid="' + id + '"><i class="ti ti-trash"></i> Supprimer l engin</button>' +
+    (st !== 'en-panne' ? '<button class="btn" style="background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.3);" id="btn-signal-panne" data-eid="' + id + '"><i class="ti ti-alert-triangle"></i> Signaler panne</button>' : '') +
+    '<button class="btn btn-or" data-eid="' + id + '" id="btn-new-aff-det"><i class="ti ti-plus"></i> Affecter</button>' +
+    '</div>';
+
+  document.getElementById('ov-detail').classList.add('open');
+  document.getElementById('btn-close-det').addEventListener('click', function() { document.getElementById('ov-detail').classList.remove('open'); });
+  document.getElementById('btn-new-aff-det').addEventListener('click', function() { document.getElementById('ov-detail').classList.remove('open'); openAffect(this.dataset.eid); });
+  document.getElementById('btn-export-det').addEventListener('click', function() { exportEnginExcel(this.dataset.eid); });
+  document.getElementById('btn-del-engin').addEventListener('click', function() {
+    var eid = this.dataset.eid;
+    askPin(function() { deleteEngin(eid); });
+  });
+
+  // Sous-onglets
+  mb.querySelectorAll('.subtab').forEach(function(t) {
+    t.addEventListener('click', function() {
+      mb.querySelectorAll('.subtab').forEach(function(x) { x.classList.remove('active'); });
+      mb.querySelectorAll('.subpage').forEach(function(x) { x.classList.remove('active'); });
+      this.classList.add('active');
+      mb.querySelector('#sub-' + this.dataset.sub).classList.add('active');
+    });
+  });
+
+  // Signaler panne -> change statut + envoie alerte email
+  var btnPanne = document.getElementById('btn-signal-panne');
+  if (btnPanne) {
+    btnPanne.addEventListener('click', function() {
+      if (!confirm('Confirmer la panne de cet engin ?\\n\\nUn email d alerte sera envoye a Samuel et Gedeon.')) return;
+      var aid = uid();
+      var data = { enginId:id, chantier: ch !== '—' ? ch : '', date: new Date().toISOString().split('T')[0], status:'en-panne', cout:0, operateur:'', notes:'Panne signalee via l application' };
+      affectations[aid] = data;
+      localStorage.setItem('cauris-eng-aff', JSON.stringify(affectations));
+      renderAll();
+      apiPost({type:'saveVehicle', id:aid, record:data}, function() { setTimeout(loadData, 1000); });
+      envoyerAlertePanne(e, ch !== '—' ? ch : null);
+      document.getElementById('ov-detail').classList.remove('open');
+    });
+  }
+
+  mb.querySelectorAll('.btn-del-aff').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var aid = this.dataset.aid;
+      askPin(function() {
+        delete affectations[aid];
+        localStorage.setItem('cauris-eng-aff', JSON.stringify(affectations));
+        renderAll();
+        apiPost({type:'delete', sheet:'affectations', id:aid}, null);
+        document.getElementById('ov-detail').classList.remove('open');
+        toast('Affectation supprimee');
+      });
+    });
+  });
+
+  // VGP photos
+  renderPhotoGrid('vgp-grid', vgpPhotos, id, 'vgp');
+  document.getElementById('vgp-file').addEventListener('change', function() { handlePhotoUpload(this, id, 'vgp'); });
+
+  // CACES photos
+  renderPhotoGrid('caces-grid', cacesPhotos, id, 'caces');
+  document.getElementById('caces-file').addEventListener('change', function() { handlePhotoUpload(this, id, 'caces'); });
+
+  // Compte-rendu mecanicien
+  renderCrList(crList);
+  document.getElementById('cr-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('btn-add-cr').addEventListener('click', function() {
+    document.getElementById('cr-form').style.display = 'block';
+    this.style.display = 'none';
+  });
+  document.getElementById('btn-cr-cancel').addEventListener('click', function() {
+    document.getElementById('cr-form').style.display = 'none';
+    document.getElementById('btn-add-cr').style.display = 'inline-flex';
+    document.getElementById('cr-texte').value = '';
+    document.getElementById('cr-meca').value = '';
+    document.getElementById('cr-photo-preview').innerHTML = '';
+    crPendingPhoto = null;
+  });
+  document.getElementById('btn-cr-photo').addEventListener('click', function() { document.getElementById('cr-file').click(); });
+  document.getElementById('cr-file').addEventListener('change', function() {
+    if (!this.files || !this.files[0]) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      crPendingPhoto = ev.target.result;
+      document.getElementById('cr-photo-preview').innerHTML = '<img src="' + crPendingPhoto + '" style="max-width:120px;border-radius:8px;">';
+    };
+    reader.readAsDataURL(this.files[0]);
+  });
+  document.getElementById('btn-cr-save').addEventListener('click', function() {
+    var meca = document.getElementById('cr-meca').value.trim();
+    var texte = document.getElementById('cr-texte').value.trim();
+    var date = document.getElementById('cr-date').value;
+    if (!meca || !texte) { alert('Mecanicien et description obligatoires.'); return; }
+    var crId = 'cr_' + Date.now();
+    var data = { enginId:id, mecanicien:meca, date:date, texte:texte, photo: crPendingPhoto || null };
+    comptesRendus[crId] = data;
+    localStorage.setItem('cauris-eng-cr', JSON.stringify(comptesRendus));
+    apiPost({type:'saveVehicle', id:crId, record:data}, function() { setTimeout(loadData, 1500); });
+    toast('Compte-rendu enregistre');
+    openDetail(id);
+  });
+
+  // Info machine
+  document.getElementById('btn-save-info').addEventListener('click', function() {
+    var data = {
+      marque: document.getElementById('info-marque').value.trim(),
+      modele: document.getElementById('info-modele').value.trim(),
+      annee: document.getElementById('info-annee').value.trim(),
+      serie: document.getElementById('info-serie').value.trim(),
+      immat: document.getElementById('info-immat').value.trim()
+    };
+    infosMachine[id] = data;
+    localStorage.setItem('cauris-eng-info', JSON.stringify(infosMachine));
+    var infoId = '_info_' + id;
+    apiPost({type:'saveVehicle', id:infoId, record:data}, function() { setTimeout(loadData, 1500); });
+    toast('Informations machine enregistrees');
+  });
+
+  // Factures
+  renderFactList(factList, e);
+  factPendingPhoto = null;
+  document.getElementById('fact-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('btn-add-fact').addEventListener('click', function() {
+    document.getElementById('fact-form').style.display = 'block';
+    this.style.display = 'none';
+  });
+  document.getElementById('btn-fact-cancel').addEventListener('click', function() {
+    document.getElementById('fact-form').style.display = 'none';
+    document.getElementById('btn-add-fact').style.display = 'inline-flex';
+    document.getElementById('fact-fourn').value = '';
+    document.getElementById('fact-montant').value = '';
+    document.getElementById('fact-piece').value = '';
+    document.getElementById('fact-photo-preview').innerHTML = '';
+    factPendingPhoto = null;
+  });
+  document.getElementById('btn-fact-photo').addEventListener('click', function() { document.getElementById('fact-file').click(); });
+  document.getElementById('fact-file').addEventListener('change', function() {
+    if (!this.files || !this.files[0]) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      factPendingPhoto = ev.target.result;
+      document.getElementById('fact-photo-preview').innerHTML = '<img src="' + factPendingPhoto + '" style="max-width:120px;border-radius:8px;">';
+    };
+    reader.readAsDataURL(this.files[0]);
+  });
+  document.getElementById('btn-fact-save').addEventListener('click', function() {
+    var fourn = document.getElementById('fact-fourn').value.trim();
+    var montant = parseFloat(document.getElementById('fact-montant').value);
+    var date = document.getElementById('fact-date').value;
+    var piece = document.getElementById('fact-piece').value.trim();
+    if (!fourn || !montant) { alert('Fournisseur et montant obligatoires.'); return; }
+    var factId = 'fact_' + Date.now();
+    var data = { enginId:id, fournisseur:fourn, montant:montant, date:date, piece:piece, photo: factPendingPhoto || null };
+    factures[factId] = data;
+    localStorage.setItem('cauris-eng-fact', JSON.stringify(factures));
+    apiPost({type:'saveVehicle', id:factId, record:data}, function() { setTimeout(loadData, 1500); });
+    toast('Facture enregistree');
+    openDetail(id);
+  });
+  var btnExport = document.getElementById('btn-export-fact');
+  if (btnExport) {
+    btnExport.addEventListener('click', function() { exporterFacturesPDF(e, factList); });
+  }
+}
+
+function renderFactList(factList, engin) {
+  var wrap = document.getElementById('fact-list');
+  if (!wrap) return;
+  if (!factList.length) { wrap.innerHTML = '<p style="color:var(--tx3);font-size:13px;">Aucune facture</p>'; return; }
+  var totalFact = factList.reduce(function(s,x) { return s + (parseFloat(x[1].montant)||0); }, 0);
+  var h = '';
+  factList.forEach(function(x) {
+    var factId = x[0], d = x[1];
+    h += '<div class="cr-item">' +
+      '<div class="cr-head">' +
+        '<span class="cr-meca">' + d.fournisseur + (d.piece ? ' — ' + d.piece : '') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span style="color:var(--or);font-weight:700;font-size:13px;">' + parseFloat(d.montant).toLocaleString('fr-FR') + ' €</span>' +
+          '<span class="cr-date">' + fmtD(d.date) + '</span>' +
+          '<button class="ba fact-del-btn" data-fid="' + factId + '" data-eid="' + d.enginId + '" style="flex:none;padding:4px 8px;font-size:11px;"><i class="ti ti-trash"></i></button>' +
+        '</div>' +
+      '</div>' +
+      (d.photo ? '<img src="' + d.photo + '" style="max-width:140px;border-radius:8px;margin-top:8px;cursor:pointer;" class="fact-photo-view">' : '') +
+    '</div>';
+  });
+  h += '<div style="text-align:right;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);"><span style="font-size:12px;color:var(--tx3)">Total : </span><span style="font-weight:700;color:var(--or);font-size:14px;">' + totalFact.toLocaleString('fr-FR') + ' €</span></div>';
+  wrap.innerHTML = h;
+  wrap.querySelectorAll('.fact-photo-view').forEach(function(img) {
+    img.addEventListener('click', function() {
+      var w = window.open();
+      w.document.write('<img src="' + this.src + '" style="max-width:100%;">');
+    });
+  });
+  wrap.querySelectorAll('.fact-del-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var fid = this.dataset.fid;
+      var eid = this.dataset.eid;
+      askPin(function() {
+        delete factures[fid];
+        localStorage.setItem('cauris-eng-fact', JSON.stringify(factures));
+        apiPost({type:'delete', sheet:'vehicles', id:fid}, null);
+        toast('Facture supprimee');
+        openDetail(eid);
+      });
+    });
+  });
+}
+
+function exporterFacturesPDF(engin, factList) {
+  var totalFact = factList.reduce(function(s,x) { return s + (parseFloat(x[1].montant)||0); }, 0);
+  var dt = new Date().toLocaleDateString('fr-FR');
+  var rowsHtml = '';
+  factList.forEach(function(x) {
+    var d = x[1];
+    rowsHtml += '<tr><td style="padding:8px;border-bottom:1px solid #ddd;">' + fmtD(d.date) + '</td>' +
+      '<td style="padding:8px;border-bottom:1px solid #ddd;">' + d.fournisseur + '</td>' +
+      '<td style="padding:8px;border-bottom:1px solid #ddd;">' + (d.piece||'—') + '</td>' +
+      '<td style="padding:8px;border-bottom:1px solid #ddd;text-align:right;">' + parseFloat(d.montant).toLocaleString('fr-FR') + ' €</td></tr>';
+  });
+  var html = '<html><head><meta charset="UTF-8"><title>Factures ' + engin.id + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;padding:30px;color:#1A1A1A;}h1{font-size:20px;border-bottom:3px solid #F05A28;padding-bottom:10px;}table{width:100%;border-collapse:collapse;margin-top:20px;}th{background:#F05A28;color:white;padding:8px;text-align:left;}.total{font-size:16px;font-weight:bold;text-align:right;margin-top:16px;}</style>' +
+    '</head><body>' +
+    '<h1>CAURIS — Factures et pieces : ' + engin.id + ' ' + engin.nom + '</h1>' +
+    '<p>Genere le ' + dt + '</p>' +
+    '<table><thead><tr><th>Date</th><th>Fournisseur</th><th>Piece</th><th style="text-align:right;">Montant</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+    '<div class="total">Total : ' + totalFact.toLocaleString('fr-FR') + ' € HT</div>' +
+    '</body></html>';
+  var w = window.open();
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function() { w.print(); }, 300);
+}
+
+function renderPhotoGrid(gridId, photos, enginId, type) {
+  var grid = document.getElementById(gridId);
+  if (!grid) return;
+  var h = '';
+  photos.forEach(function(p, idx) {
+    h += '<div class="photo-thumb"><img src="' + p + '" data-full="' + p + '"><button class="pdel" data-idx="' + idx + '"><i class="ti ti-x"></i></button></div>';
+  });
+  h += '<div class="photo-add-btn" id="add-' + type + '-photo"><i class="ti ti-camera-plus"></i><span>Ajouter</span></div>';
+  grid.innerHTML = h;
+
+  grid.querySelector('#add-' + type + '-photo').addEventListener('click', function() {
+    document.getElementById(type + '-file').click();
+  });
+  grid.querySelectorAll('img').forEach(function(img) {
+    img.addEventListener('click', function() {
+      var w = window.open();
+      w.document.write('<img src="' + this.dataset.full + '" style="max-width:100%;">');
+    });
+  });
+  grid.querySelectorAll('.pdel').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      askPin(function() {
+        var idx = parseInt(btn.dataset.idx);
+        var store = type === 'vgp' ? docsVgp : docsCaces;
+        store[enginId].splice(idx, 1);
+        localStorage.setItem('cauris-eng-' + type, JSON.stringify(store));
+        var docId = '_' + type + '_' + enginId;
+        apiPost({type:'saveVehicle', id:docId, record:{photos: store[enginId]}}, null);
+        renderPhotoGrid(gridId, store[enginId], enginId, type);
+        toast('Photo supprimee');
+      });
+    });
+  });
+}
+
+function handlePhotoUpload(input, enginId, type) {
+  if (!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var store = type === 'vgp' ? docsVgp : docsCaces;
+    if (!store[enginId]) store[enginId] = [];
+    store[enginId].push(ev.target.result);
+    localStorage.setItem('cauris-eng-' + type, JSON.stringify(store));
+    var docId = '_' + type + '_' + enginId;
+    apiPost({type:'saveVehicle', id:docId, record:{photos: store[enginId]}}, function() { setTimeout(loadData, 1500); });
+    renderPhotoGrid(type + '-grid', store[enginId], enginId, type);
+    toast('Photo ajoutee');
+  };
+  reader.readAsDataURL(input.files[0]);
+  input.value = '';
+}
+
+function renderCrList(crList) {
+  var wrap = document.getElementById('cr-list');
+  if (!wrap) return;
+  if (!crList.length) { wrap.innerHTML = '<p style="color:var(--tx3);font-size:13px;">Aucun compte-rendu</p>'; return; }
+  var h = '';
+  crList.forEach(function(x) {
+    var crId = x[0], d = x[1];
+    h += '<div class="cr-item">' +
+      '<div class="cr-head"><span class="cr-meca">' + d.mecanicien + '</span><div style="display:flex;align-items:center;gap:8px;"><span class="cr-date">' + fmtD(d.date) + '</span><button class="ba cr-del-btn" data-crid="' + crId + '" data-eid="' + d.enginId + '" style="flex:none;padding:4px 8px;font-size:11px;"><i class="ti ti-trash"></i></button></div></div>' +
+      '<div class="cr-text">' + d.texte + '</div>' +
+      (d.photo ? '<img src="' + d.photo + '" style="max-width:140px;border-radius:8px;margin-top:8px;cursor:pointer;" class="cr-photo-view">' : '') +
+    '</div>';
+  });
+  wrap.innerHTML = h;
+  wrap.querySelectorAll('.cr-photo-view').forEach(function(img) {
+    img.addEventListener('click', function() {
+      var w = window.open();
+      w.document.write('<img src="' + this.src + '" style="max-width:100%;">');
+    });
+  });
+  wrap.querySelectorAll('.cr-del-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var crId = this.dataset.crid;
+      var eid = this.dataset.eid;
+      if (!confirm('Supprimer ce compte-rendu ?')) return;
+      delete comptesRendus[crId];
+      localStorage.setItem('cauris-eng-cr', JSON.stringify(comptesRendus));
+      apiPost({type:'delete', sheet:'vehicles', id:crId}, null);
+      toast('Compte-rendu supprime');
+      openDetail(eid);
+    });
+  });
+}
+
+// CHANTIERS
+function renderChantiers() {
+  var map = {};
+  chantiers.forEach(function(c) { map[c] = {engins:[], cout:0}; });
+  ENGINS.forEach(function(e) {
+    var ch = getCh(e.id), c = getCout(e.id);
+    if (ch !== '—' && map[ch]) { map[ch].engins.push(e); map[ch].cout += c; }
+  });
+  var active = Object.entries(map).filter(function(x) { return x[1].engins.length > 0; });
+  var div = document.getElementById('cc');
+  if (!active.length) { div.innerHTML = '<div class="empty"><i class="ti ti-building-factory"></i><p>Aucun engin en chantier</p></div>'; return; }
+  var h = '';
+  active.forEach(function(x) {
+    var ch = x[0], d = x[1];
+    var rows = '';
+    d.engins.forEach(function(e) { rows += '<div class="er"><span class="rid">' + e.id + '</span><span class="rn">' + e.nom + '</span><span class="rc2">' + fmtE(getCout(e.id)) + '</span></div>'; });
+    h += '<div class="cc"><div class="cc-h"><span class="cc-n"><i class="ti ti-building-factory"></i>' + ch + '</span><span class="cc-c">' + d.cout.toLocaleString('fr-FR') + ' €/j</span></div><div class="cc-b">' + rows + '<div style="margin-top:10px;padding-top:10px;border-top:2px solid var(--bd2);display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--tx3)">' + d.engins.length + ' engin(s)</span><span style="font-family:Barlow Condensed,sans-serif;font-size:17px;font-weight:700;color:var(--or)">' + d.cout.toLocaleString('fr-FR') + ' €/j</span></div></div></div>';
+  });
+  div.innerHTML = h;
+}
+
+// JOURNAL
+function renderJournal() {
+  var tb = document.getElementById('jtb');
+  var sorted = Object.entries(affectations).sort(function(a,b) { return b[1].date.localeCompare(a[1].date); });
+  if (!sorted.length) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--tx3);">Aucune affectation</td></tr>'; return; }
+  var sL = {disponible:'Disponible','en-chantier':'En chantier','en-panne':'En panne',entretien:'Entretien',vendu:'Vendu','hors-parc':'Hors parc',depot:'Au depot'};
+  var eM = {}; ENGINS.forEach(function(e) { eM[e.id] = e; });
+  var h = '';
+  sorted.forEach(function(x) {
+    var id = x[0], a = x[1], e = eM[a.enginId];
+    h += '<tr><td style="color:var(--tx2)">' + fmtD(a.date) + '</td><td><span style="font-family:Barlow Condensed,sans-serif;font-weight:700;color:var(--or);">' + a.enginId + '</span><br><span style="font-size:11px;color:var(--tx3)">' + (e?e.nom:'') + '</span></td><td>' + (a.chantier||'—') + '</td><td><span class="bdg ' + a.status + '">' + (sL[a.status]||a.status) + '</span></td><td style="font-weight:600;color:var(--or)">' + fmtE(a.cout) + '</td><td style="color:var(--tx2)">' + (a.operateur||'—') + '</td><td style="color:var(--tx2)">' + (a.notes||'—') + '</td><td><button class="ba btn-del-j" data-aid="' + id + '" style="flex:none;padding:4px 8px;font-size:11px;"><i class="ti ti-trash"></i></button></td></tr>';
+  });
+  tb.innerHTML = h;
+  tb.querySelectorAll('.btn-del-j').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var aid = this.dataset.aid;
+      askPin(function() {
+        delete affectations[aid];
+        localStorage.setItem('cauris-eng-aff', JSON.stringify(affectations));
+        renderAll();
+        apiPost({type:'delete', sheet:'affectations', id:aid}, null);
+        toast('Affectation supprimee');
+      });
+    });
+  });
+}
+
+// RAPPORT
+function renderRapport() {
+  var cC = {}; chantiers.forEach(function(c) { cC[c] = 0; });
+  Object.values(affectations).forEach(function(a) { if(a.chantier) cC[a.chantier] = (cC[a.chantier]||0) + (parseFloat(a.cout)||0); });
+  var mxC = Math.max.apply(null, Object.values(cC).concat([1]));
+  var r1 = Object.entries(cC).filter(function(x) { return x[1]>0; }).sort(function(a,b) { return b[1]-a[1]; });
+  document.getElementById('rp1').innerHTML = r1.length ? r1.map(function(x) { return '<div class="pi"><div class="pl"><span>' + x[0] + '</span><span>' + x[1].toLocaleString('fr-FR') + ' €</span></div><div class="pb"><div class="pf" style="width:' + (x[1]/mxC*100).toFixed(0) + '%"></div></div></div>'; }).join('') : '<p style="color:var(--tx3);font-size:13px;">Aucune donnee</p>';
+
+  var catC = {}; ENGINS.forEach(function(e) { catC[e.cat] = (catC[e.cat]||0)+1; });
+  var tot = ENGINS.length;
+  document.getElementById('rp2').innerHTML = Object.entries(catC).sort(function(a,b){return b[1]-a[1];}).map(function(x) { return '<div class="pi"><div class="pl"><span>' + x[0] + '</span><span>' + x[1] + ' engins</span></div><div class="pb"><div class="pf" style="width:' + (x[1]/tot*100).toFixed(0) + '%"></div></div></div>'; }).join('');
+
+  var cE = {}; Object.values(affectations).forEach(function(a) { cE[a.enginId] = (cE[a.enginId]||0) + (parseFloat(a.cout)||0); });
+  var top = Object.entries(cE).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  var mxE = Math.max.apply(null, top.map(function(x){return x[1];}).concat([1]));
+  var eM = {}; ENGINS.forEach(function(e) { eM[e.id] = e; });
+  document.getElementById('rp3').innerHTML = top.length ? top.map(function(x) { var e = eM[x[0]]; return '<div class="pi"><div class="pl"><span style="font-family:Barlow Condensed,sans-serif;font-weight:700;">' + x[0] + ' — ' + (e?e.nom:'') + '</span><span>' + x[1].toLocaleString('fr-FR') + ' €</span></div><div class="pb"><div class="pf" style="width:' + (x[1]/mxE*100).toFixed(0) + '%"></div></div></div>'; }).join('') : '<p style="color:var(--tx3);font-size:13px;">Aucune donnee</p>';
+
+  // Remplir le select export engin
+  var sel = document.getElementById('export-eng-select');
+  if (sel) {
+    var curVal = sel.value;
+    sel.innerHTML = '<option value="">Choisir un engin...</option>';
+    ENGINS.forEach(function(e) {
+      var o = document.createElement('option');
+      o.value = e.id;
+      o.textContent = e.id + ' — ' + e.nom;
+      sel.appendChild(o);
+    });
+    sel.value = curVal;
+  }
+
+  // Remplir le select export par chantier
+  var selCh = document.getElementById('export-ch-select');
+  if (selCh) {
+    var curChVal = selCh.value;
+    // Récupérer tous les chantiers qui ont des affectations
+    var chantiersAff = {};
+    Object.values(affectations).forEach(function(a) { if (a.chantier) chantiersAff[a.chantier] = 1; });
+    selCh.innerHTML = '<option value="">Choisir un chantier...</option>';
+    Object.keys(chantiersAff).sort().forEach(function(c) {
+      var o = document.createElement('option'); o.value = c; o.textContent = c; selCh.appendChild(o);
+    });
+    selCh.value = curChVal;
+  }
+}
+
+// =====================
+// EXPORT EXCEL
+// =====================
+function getAffectationsEngin(enginId) {
+  return Object.entries(affectations)
+    .filter(function(x) { return x[1].enginId === enginId; })
+    .sort(function(a,b) { return (a[1].date||'').localeCompare(b[1].date||''); });
+}
+
+function buildExcelRows(enginId) {
+  var eng = ENGINS.find(function(e) { return e.id === enginId; });
+  var aff = getAffectationsEngin(enginId);
+  var sL = {disponible:'Disponible','en-chantier':'En chantier','en-panne':'En panne',entretien:'Entretien',vendu:'Vendu','hors-parc':'Hors parc',depot:'Au depot'};
+  var rows = [];
+  aff.forEach(function(x) {
+    var a = x[1];
+    rows.push([
+      enginId,
+      eng ? eng.nom : '',
+      eng ? eng.cat : '',
+      fmtD(a.date),
+      a.chantier || '—',
+      sL[a.status] || a.status || '',
+      a.cout ? parseFloat(a.cout) : 0,
+      a.operateur || '',
+      a.notes || ''
+    ]);
+  });
+  return rows;
+}
+
+function exportEnginExcel(enginId) {
+  if (!enginId) { alert('Engin non specifie.'); return; }
+  var eng = ENGINS.find(function(e) { return e.id === enginId; });
+  if (!eng) { alert('Engin introuvable.'); return; }
+  var rows = buildExcelRows(enginId);
+  if (!rows.length) { alert('Aucune affectation pour cet engin.'); return; }
+
+  var entete = ['ID', 'Nom', 'Categorie', 'Date', 'Chantier', 'Statut', 'Cout/j (€)', 'Operateur', 'Notes'];
+  var data = [entete].concat(rows);
+
+  // Ligne total
+  var totalCout = rows.reduce(function(s,r) { return s + (r[6]||0); }, 0);
+  data.push(['', '', '', '', '', 'TOTAL', totalCout, '', rows.length + ' affectation(s)']);
+
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:10},{wch:22},{wch:16},{wch:12},{wch:20},{wch:14},{wch:12},{wch:16},{wch:24}];
+
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, eng.id);
+  XLSX.writeFile(wb, 'CAURIS_' + eng.id + '_' + eng.nom.replace(/[^a-zA-Z0-9]/g,'_') + '.xlsx');
+  toast('Export Excel genere pour ' + eng.id + ' — ' + eng.nom);
+}
+
+function exportTousEnginsExcel() {
+  if (!Object.keys(affectations).length) { alert('Aucune affectation enregistree.'); return; }
+
+  var wb = XLSX.utils.book_new();
+  var entete = ['ID', 'Nom', 'Categorie', 'Date', 'Chantier', 'Statut', 'Cout/j (€)', 'Operateur', 'Notes'];
+
+  // Onglet global — toutes les affectations ensemble
+  var allRows = [entete];
+  ENGINS.forEach(function(e) {
+    var rows = buildExcelRows(e.id);
+    rows.forEach(function(r) { allRows.push(r); });
+  });
+  var wsFull = XLSX.utils.aoa_to_sheet(allRows);
+  wsFull['!cols'] = [{wch:10},{wch:22},{wch:16},{wch:12},{wch:20},{wch:14},{wch:12},{wch:16},{wch:24}];
+  XLSX.utils.book_append_sheet(wb, wsFull, 'Toutes affectations');
+
+  // Un onglet par engin (seulement ceux qui ont des affectations)
+  ENGINS.forEach(function(e) {
+    var rows = buildExcelRows(e.id);
+    if (!rows.length) return;
+    var data = [entete].concat(rows);
+    var totalCout = rows.reduce(function(s,r) { return s + (r[6]||0); }, 0);
+    data.push(['', '', '', '', '', 'TOTAL', totalCout, '', rows.length + ' affectation(s)']);
+    var ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{wch:10},{wch:22},{wch:16},{wch:12},{wch:20},{wch:14},{wch:12},{wch:16},{wch:24}];
+    // Nom de l'onglet max 31 caractères (limite Excel)
+    var sheetName = (e.id + ' ' + e.nom).substring(0, 31);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+
+  var dt = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, 'CAURIS_Parc_Materiel_' + dt + '.xlsx');
+  toast('Export complet du parc materiel genere !');
+}
+
+function exportChantierExcel(chantier) {
+  if (!chantier) { alert('Selectionnez un chantier.'); return; }
+
+  var entete = ['ID Engin', 'Nom', 'Categorie', 'Date', 'Statut', 'Cout/j (€)', 'Operateur', 'Notes'];
+  var sL = {disponible:'Disponible','en-chantier':'En chantier','en-panne':'En panne',entretien:'Entretien',vendu:'Vendu','hors-parc':'Hors parc',depot:'Au depot'};
+
+  // Récupérer toutes les affectations pour ce chantier, triées par date
+  var aff = Object.entries(affectations)
+    .filter(function(x) { return x[1].chantier === chantier; })
+    .sort(function(a,b) { return (a[1].date||'').localeCompare(b[1].date||''); });
+
+  if (!aff.length) { alert('Aucune affectation trouvee pour ce chantier.'); return; }
+
+  var eM = {}; ENGINS.forEach(function(e) { eM[e.id] = e; });
+
+  // Onglet 1 — toutes les affectations du chantier
+  var allRows = [entete];
+  aff.forEach(function(x) {
+    var a = x[1], e = eM[a.enginId];
+    allRows.push([
+      a.enginId,
+      e ? e.nom : '',
+      e ? e.cat : '',
+      fmtD(a.date),
+      sL[a.status] || a.status || '',
+      a.cout ? parseFloat(a.cout) : 0,
+      a.operateur || '',
+      a.notes || ''
+    ]);
+  });
+  var totalCout = aff.reduce(function(s,x) { return s + (parseFloat(x[1].cout)||0); }, 0);
+  var enginsUniq = {};
+  aff.forEach(function(x) { if (x[1].enginId) enginsUniq[x[1].enginId] = 1; });
+  allRows.push(['', '', '', '', 'TOTAL', totalCout, Object.keys(enginsUniq).length + ' engin(s)', aff.length + ' affectation(s)']);
+
+  var wsAll = XLSX.utils.aoa_to_sheet(allRows);
+  wsAll['!cols'] = [{wch:12},{wch:22},{wch:16},{wch:12},{wch:14},{wch:12},{wch:16},{wch:24}];
+
+  var wb = XLSX.utils.book_new();
+  var sheetNameAll = ('Chantier ' + chantier).substring(0, 31);
+  XLSX.utils.book_append_sheet(wb, wsAll, sheetNameAll);
+
+  // Onglet 2 — synthèse par engin (cumul du chantier)
+  var synthRows = [['ID Engin', 'Nom', 'Categorie', 'Nb affectations', 'Cout cumule (€)']];
+  var byEngin = {};
+  aff.forEach(function(x) {
+    var a = x[1];
+    if (!byEngin[a.enginId]) byEngin[a.enginId] = { count: 0, cout: 0 };
+    byEngin[a.enginId].count++;
+    byEngin[a.enginId].cout += parseFloat(a.cout) || 0;
+  });
+  Object.keys(byEngin).sort().forEach(function(eid) {
+    var e = eM[eid], d = byEngin[eid];
+    synthRows.push([eid, e ? e.nom : '', e ? e.cat : '', d.count, d.cout]);
+  });
+  synthRows.push(['', '', 'TOTAL', aff.length, totalCout]);
+
+  var wsSynth = XLSX.utils.aoa_to_sheet(synthRows);
+  wsSynth['!cols'] = [{wch:12},{wch:22},{wch:16},{wch:16},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, wsSynth, 'Synthese par engin');
+
+  var dt = new Date().toISOString().split('T')[0];
+  var fname = 'CAURIS_Chantier_' + chantier.replace(/[^a-zA-Z0-9]/g,'_') + '_' + dt + '.xlsx';
+  XLSX.writeFile(wb, fname);
+  toast('Export chantier "' + chantier + '" genere !');
+}
+// Statuts qui ne necessitent PAS de chantier
+var STATUTS_SANS_CHANTIER = ['disponible', 'entretien', 'depot', 'vendu', 'hors-parc', 'en-panne'];
+
+function toggleChantierField(statut) {
+  var fm = document.getElementById('fm-chantier');
+  if (!fm) return;
+  var besoinChantier = STATUTS_SANS_CHANTIER.indexOf(statut) < 0; // seulement en-chantier
+  fm.style.display = besoinChantier ? '' : 'none';
+  var lbl = fm.querySelector('.fl');
+  if (lbl) lbl.textContent = 'Chantier *';
+}
+
+function openAffect(enginId) {
+  document.getElementById('a-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('a-cout').value = '';
+  document.getElementById('a-op').value = '';
+  document.getElementById('a-notes').value = '';
+  document.getElementById('a-stat').value = 'en-chantier';
+  document.getElementById('a-ch').value = '';
+  toggleChantierField('en-chantier');
+  if (enginId) {
+    document.getElementById('a-engin').value = enginId;
+    var eng = ENGINS.find(function(e) { return e.id === enginId; });
+    if (eng && eng.coutBase > 0) document.getElementById('a-cout').value = eng.coutBase;
+  }
+  document.getElementById('ov-affect').classList.add('open');
+}
+
+function saveAffect() {
+  var eid = document.getElementById('a-engin').value;
+  var statut = document.getElementById('a-stat').value;
+  var ch = document.getElementById('a-ch').value;
+  var dt = document.getElementById('a-date').value;
+  var besoinChantier = STATUTS_SANS_CHANTIER.indexOf(statut) < 0;
+  if (!eid || !dt) { alert('Engin et date obligatoires.'); return; }
+  if (besoinChantier && !ch) { alert('Chantier obligatoire pour ce statut.'); return; }
+  var id = uid();
+  var data = {
+    enginId: eid,
+    chantier: besoinChantier ? ch : (statut === 'depot' ? 'Depot' : ''),
+    date: dt,
+    status: statut,
+    cout: parseFloat(document.getElementById('a-cout').value)||0,
+    operateur: document.getElementById('a-op').value.trim(),
+    notes: document.getElementById('a-notes').value.trim()
+  };
+  affectations[id] = data;
+  localStorage.setItem('cauris-eng-aff', JSON.stringify(affectations));
+  renderAll();
+  setSS('saving');
+  apiPost({type:'saveVehicle', id:id, record:data}, function() { toast('Affectation enregistree !'); setTimeout(loadData, 1000); });
+  document.getElementById('ov-affect').classList.remove('open');
+}
+</script>
+</body>
+</html>
