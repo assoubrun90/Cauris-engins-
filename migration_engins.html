@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Migration CAURIS Engins → Firebase</title>
+<style>
+  body { font-family: system-ui, sans-serif; background:#0F1117; color:#F8FAFC; max-width:720px; margin:40px auto; padding:0 20px; }
+  h1 { color:#F05A28; font-size:22px; }
+  button { background:#F05A28; color:#fff; border:none; padding:14px 28px; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  #log { background:#1A1D27; border:1px solid #3A4060; border-radius:10px; padding:16px; margin-top:20px; font-family:monospace; font-size:13px; white-space:pre-wrap; min-height:200px; max-height:60vh; overflow:auto; }
+  .warn { background:rgba(240,90,40,.1); border:1px solid rgba(240,90,40,.4); border-radius:10px; padding:12px 16px; font-size:14px; margin:16px 0; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<h1>🚜 Migration CAURIS Engins : Google Sheets → Firebase</h1>
+<div class="warn">
+  Cette page copie <b>toutes les données</b> (affectations, chantiers, engins personnalisés, VGP, CACES,
+  comptes-rendus, infos machines, factures, locations) vers Firestore, collection <b>engins_data</b>.
+  Mode COMPLET utilisé (rien n'est filtré, y compris les photos). Le Sheets n'est pas modifié.
+</div>
+<button id="go">Lancer la migration</button>
+<div id="log">Prêt. Cliquez sur « Lancer la migration ».</div>
+
+<script>
+var SU = 'https://script.google.com/macros/s/AKfycbzGCpggMH3OKymB4_ZBxNYRLbTZVzQdiYXCzIwdbxdWRyb61x8w6vMUdBLRB1wuowoyHw/exec';
+
+var firebaseConfig = {
+  apiKey: "AIzaSyB4tcfHaFAQMSHksOiq-N6BrYzHcNxkNd4",
+  authDomain: "cauris-rapport.firebaseapp.com",
+  projectId: "cauris-rapport",
+  storageBucket: "cauris-rapport.firebasestorage.app",
+  messagingSenderId: "1060757272334",
+  appId: "1:1060757272334:web:6482a9b60fdf3bdbf7095f"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
+var ENGINS_COLLECTION = 'engins_data';
+
+var logEl = document.getElementById('log');
+function log(msg) { logEl.textContent += '\n' + msg; logEl.scrollTop = logEl.scrollHeight; }
+
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise(function(_, rej) { setTimeout(function() { rej(new Error('TIMEOUT')); }, ms); })
+  ]);
+}
+
+document.getElementById('go').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  logEl.textContent = '⏳ Lecture du Google Sheets (mode COMPLET, avec photos)...';
+
+  // ?full=1 : indispensable ici pour récupérer aussi les fiches VGP/CACES/factures
+  // avec leurs photos, que le mode léger habituel exclurait.
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', SU + '?full=1&t=' + Date.now(), true);
+  xhr.timeout = 90000;
+  xhr.onload = function() {
+    var d;
+    try { d = JSON.parse(xhr.responseText); }
+    catch(e) { log('❌ Réponse du Sheets illisible.'); btn.disabled = false; return; }
+
+    var items = [];
+    Object.keys(d.vehicles || {}).forEach(function(id) {
+      items.push({ id: id, rec: d.vehicles[id] });
+    });
+    if (d.affectations) {
+      Object.keys(d.affectations).forEach(function(id) {
+        var fid = id.indexOf('aff_') === 0 ? id : 'aff_' + id;
+        if (!items.some(function(x) { return x.id === fid; })) items.push({ id: fid, rec: d.affectations[id] });
+      });
+    }
+
+    log('📦 ' + items.length + ' enregistrements à copier.');
+
+    log('🔌 Test de connexion à Firestore...');
+    withTimeout(db.collection(ENGINS_COLLECTION).doc('_test_migration').set({t: Date.now()}), 12000)
+      .then(function() {
+        log('🔌 Connexion Firestore : OK ✅ — démarrage de la copie...');
+        db.collection(ENGINS_COLLECTION).doc('_test_migration').delete();
+        copyAll(items);
+      })
+      .catch(function(e) {
+        if (e && e.message === 'TIMEOUT') {
+          log('❌ CONNEXION FIRESTORE BLOQUÉE (aucune réponse en 12 s).');
+          log('   → Réessayez via le partage de connexion 4G/5G de votre téléphone.');
+        } else {
+          log('❌ Erreur Firestore : ' + (e.code || e.message));
+          if (e.code === 'permission-denied') log('   → Règles de sécurité non publiées.');
+        }
+        btn.disabled = false;
+      });
+
+    function copyAll(items) {
+      var i = 0, ok = 0, ko = 0;
+      function next() {
+        if (i >= items.length) {
+          log('\n========================================');
+          log('✅ Migration terminée : ' + ok + ' copiés, ' + (ko ? ko + ' échecs ❌' : '0 échec') + '.');
+          log(ko ? '⚠️ Recliquez pour retenter les échecs (sans danger).' :
+                   '👉 Mettez maintenant en ligne le nouveau index.html et sw.js sur GitHub.');
+          btn.disabled = false;
+          btn.textContent = 'Relancer (sans danger)';
+          return;
+        }
+        var it = items[i];
+        withTimeout(db.collection(ENGINS_COLLECTION).doc(String(it.id)).set(it.rec || {}), 15000)
+          .then(function() { ok++; i++; if (i % 20 === 0) log('   ... ' + i + ' / ' + items.length); next(); })
+          .catch(function(e) { ko++; log('❌ ' + it.id + ' : ' + (e.code || e.message)); i++; next(); });
+      }
+      next();
+    }
+  };
+  xhr.onerror = xhr.ontimeout = function() {
+    log('❌ Impossible de joindre le Google Sheets.');
+    btn.disabled = false;
+  };
+  xhr.send();
+});
+</script>
+</body>
+</html>
